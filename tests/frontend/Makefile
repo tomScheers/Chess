@@ -15,6 +15,6 @@ LIB = \
 all: linux
 
 linux:
-	bear -- gcc -O3 -o chess $(SRC) $(DIR) $(LIB)
+	bear -- gcc -Wl,-rpath=. -O3 -o chess $(SRC) $(DIR) $(LIB)
 
 .PHONY: linux
