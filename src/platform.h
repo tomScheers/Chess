@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+#include <cglm/cglm.h>
+
 typedef struct {
     char *title;
     void (*update_cb)(float dt);
@@ -12,6 +14,16 @@ typedef struct {
     bool is_running;
 } AppDesc;
 extern AppDesc g_app_desc;
+
+typedef struct {
+    char *vs;
+    char *fs;
+} Shader;
+
+typedef struct {
+    vec4 points[3];
+    Shader shader;
+} Quad;
 
 AppDesc chess_main(int argc, char **argv);
 
