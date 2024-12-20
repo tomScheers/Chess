@@ -1,6 +1,9 @@
 [submodule "SDL"]
 	path = vendor/sdl
 	url = https://github.com/libsdl-org/sdl
-[submodule "vendor/cglm"]
+[submodule "cglm"]
 	path = vendor/cglm
 	url = https://github.com/recp/cglm
+[submodule "sokol"]
+	path = vendor/sokol
+	url = https://github.com/floooh/sokol
