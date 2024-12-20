@@ -1,5 +1,20 @@
-#include <stdio.h>
+#include "platform.h"
 
-int main() {
-	return 0;
+void init() {
+}
+
+void update(float dt) {
+
+}
+
+void render() {
+}
+
+AppDesc chess_main(int argc, char **argv) {
+	return (AppDesc){
+		.title = "Chess",
+		.init_cb = init,
+		.update_cb = update,
+		.render_cb = render
+	};
 }
