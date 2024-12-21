@@ -34,4 +34,4 @@ typedef struct Coord {
 
 SquareTypes** createBoard();
 void printBoard(SquareTypes **board);
-Coord **getValidMoves(SquareTypes **board, Coord pieceToMove, size_t returnSize);
+Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove, size_t *returnSize);
