@@ -1,8 +1,5 @@
 #include <stdlib.h>
 #include <stdbool.h>
-// I'm having too many issues with live share, I'm not sure I can continue like this, might have to switch to more traditional pull request system
-// Yea that might be better, I do have to do a little research then but that will be fine
-// Then I can also use nvim
 
 typedef enum SquareTypes
 {

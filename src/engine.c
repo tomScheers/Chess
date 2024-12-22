@@ -107,81 +107,81 @@ bool isCheck(SquareTypes **board, Player player) {
 
   // Check for horizontal queen and rook checks
   // Check from right-hand side
-  for (int y = kingCoords->y; y < 8; ++y) {
-    if (board[y][kingCoords->x] == oposingRook ||
-        board[y][kingCoords->x] == oposingQueen)
+  for (int x = kingCoords->x + 1; x < 8; ++x) {
+    if (board[kingCoords->y][x] == oposingRook ||
+        board[kingCoords->y][x] == oposingQueen)
       return true;
-    if (board[y][kingCoords->x] != EMPTY)
+    if (board[kingCoords->y][x] != EMPTY)
       break;
   }
   // Check from left-hand side
-  for (int y = kingCoords->y; y >= 0; --y) {
-    if (board[y][kingCoords->x] == oposingRook ||
-        board[y][kingCoords->x] == oposingQueen)
+  for (int x = kingCoords->x - 1; x >= 0; --x) {
+    if (board[kingCoords->y][x] == oposingRook ||
+        board[kingCoords->y][x] == oposingQueen)
       return true;
-    if (board[y][kingCoords->x] != EMPTY)
+    if (board[kingCoords->y][x] != EMPTY)
       break;
   }
 
   // Check for vertical queen and rook checks
   // Check from right-hand side
-  for (int x = kingCoords->x; x >= 0; ++x) {
-    if (board[kingCoords->y][x] == oposingRook ||
-        board[kingCoords->y][x] == oposingQueen)
+  for (int y = kingCoords->y - 1; y >= 0; --y) {
+    if (board[y][kingCoords->x] == oposingRook ||
+        board[y][kingCoords->x] == oposingQueen)
       return true;
-    if (board[kingCoords->y][x] != EMPTY)
+    if (board[y][kingCoords->x] != EMPTY)
       break;
   }
   // Check from left-hand side
-  for (int x = kingCoords->x; x >= 0; --x) {
-    if (board[kingCoords->y][x] == oposingRook ||
-        board[kingCoords->y][x] == oposingQueen)
+  for (int y = kingCoords->y + 1; y < 8; ++y) {
+    if (board[y][kingCoords->x] == oposingRook ||
+        board[y][kingCoords->x] == oposingQueen)
       return true;
-    if (board[kingCoords->y][x] != EMPTY)
+    if (board[y][kingCoords->x] != EMPTY)
       break;
   }
 
   // Check pawn checks
-  if (board[kingCoords->y + moveIncrement][kingCoords->x + 1] == oposingPawn ||
-      board[kingCoords->y + moveIncrement][kingCoords->x + 1] == oposingPawn)
+  if ((isInRange(kingCoords->x + 1, kingCoords->y + moveIncrement) && board[kingCoords->y + moveIncrement][kingCoords->x + 1] == oposingPawn) ||
+      (isInRange(kingCoords->x - 1, kingCoords->y + moveIncrement) && board[kingCoords->y + moveIncrement][kingCoords->x - 1] == oposingPawn))
     return true;
 
   // Check for knight checks
-  if (kingCoords->y + 2 < 8 && kingCoords->x + 1 < 8 &&
+  if (isInRange(kingCoords->x + 1, kingCoords->y + 2) &&
       board[kingCoords->y + 2][kingCoords->x + 1] == oposingKnight)
     return true;
 
-  if (kingCoords->y + 2 < 8 && kingCoords->x - 1 < 8 &&
+  if (isInRange(kingCoords->x - 1, kingCoords->y + 2) &&
       board[kingCoords->y + 2][kingCoords->x - 1] == oposingKnight)
     return true;
 
-  if (kingCoords->y + 1 < 8 && kingCoords->x - 2 < 8 &&
+  if (isInRange(kingCoords->x - 2, kingCoords->y + 1) &&
       board[kingCoords->y + 1][kingCoords->x - 2] == oposingKnight)
     return true;
 
-  if (kingCoords->y - 1 < 8 && kingCoords->x - 2 < 8 &&
+  if (isInRange(kingCoords->x - 2, kingCoords->y - 1) &&
       board[kingCoords->y - 1][kingCoords->x - 2] == oposingKnight)
     return true;
 
-  if (kingCoords->y - 2 < 8 && kingCoords->x + 1 < 8 &&
+  if (isInRange(kingCoords->x + 1, kingCoords->y - 2) &&
       board[kingCoords->y - 2][kingCoords->x + 1] == oposingKnight)
     return true;
 
-  if (kingCoords->y - 2 < 8 && kingCoords->x - 1 < 8 &&
+  if (isInRange(kingCoords->x - 1, kingCoords->y - 2) &&
       board[kingCoords->y - 2][kingCoords->x - 1] == oposingKnight)
     return true;
 
-  if (kingCoords->y + 1 < 8 && kingCoords->x + 2 < 8 &&
+  if (isInRange(kingCoords->x + 2, kingCoords->y + 1) &&
       board[kingCoords->y + 1][kingCoords->x + 2] == oposingKnight)
     return true;
 
-  if (kingCoords->y - 1 < 8 && kingCoords->x + 2 < 8 &&
+  if (isInRange(kingCoords->x + 2, kingCoords->y - 1) &&
       board[kingCoords->y - 1][kingCoords->x + 2] == oposingKnight)
     return true;
 
   // Check for bishop and queen diagnol checks
-  for (int i = kingCoords->x; i < 8; ++i) {
-    if (kingCoords->y + i >= 8 || kingCoords->x + i >= 8)
+  for (int i = 1; i < 8 - kingCoords->x; ++i) {
+    if (!isInRange(kingCoords->x + i, kingCoords->y + i))
       break;
     if (board[kingCoords->y + i][kingCoords->x + i] == oposingBishop ||
         board[kingCoords->y + i][kingCoords->x + i] == oposingQueen)
@@ -190,8 +190,8 @@ bool isCheck(SquareTypes **board, Player player) {
       break;
   }
 
-  for (int i = kingCoords->x; i < 8; ++i) {
-    if (kingCoords->y + i >= 8 || kingCoords->x + i >= 8)
+  for (int i = 1; i < 8 - kingCoords->x; ++i) {
+    if (!isInRange(kingCoords->x + i, kingCoords->y - i))
       break;
     if (board[kingCoords->y - i][kingCoords->x + i] == oposingBishop ||
         board[kingCoords->y - i][kingCoords->x + i] == oposingQueen)
@@ -200,30 +200,30 @@ bool isCheck(SquareTypes **board, Player player) {
       break;
   }
 
-  for (int i = kingCoords->x; i >= 0; --i) {
-    if (isInRange(kingCoords->x + i, kingCoords->y + i));
-    if (kingCoords->y + i >= 8 || kingCoords->x + i >= 8)
+  for (int i = 1; i < 8 - (8 - kingCoords->x); ++i) {
+    if (!isInRange(kingCoords->x - i, kingCoords->y - i))
       break;
-    if (board[kingCoords->y - i][kingCoords->x + i] == oposingBishop ||
-        board[kingCoords->y - i][kingCoords->x + i] == oposingQueen)
+    if (board[kingCoords->y - i][kingCoords->x - i] == oposingBishop ||
+        board[kingCoords->y - i][kingCoords->x - i] == oposingQueen)
       return true;
-    if (board[kingCoords->y - i][kingCoords->x + i] != EMPTY)
+    if (board[kingCoords->y - i][kingCoords->x - i] != EMPTY)
       break;
   }
 
-  for (int i = kingCoords->x; i >= 0; --i) {
-    if (kingCoords->y + i >= 8 || kingCoords->x + i >= 8)
+  for (int i = 1; i < 8 - (8 - kingCoords->x); ++i) {
+    if (!isInRange(kingCoords->x - i, kingCoords->y + i))
       break;
-    if (board[kingCoords->y + i][kingCoords->x + i] == oposingBishop ||
-        board[kingCoords->y + i][kingCoords->x + i] == oposingQueen)
+    if (board[kingCoords->y + i][kingCoords->x - i] == oposingBishop ||
+        board[kingCoords->y + i][kingCoords->x - i] == oposingQueen)
       return true;
-    if (board[kingCoords->y + i][kingCoords->x + i] != EMPTY)
+    if (board[kingCoords->y + i][kingCoords->x - i] != EMPTY)
       break;
   }
   return false;
 }
 
 void movePiece(SquareTypes **board, Coord *src, Coord *dst) {
+  if (src->x == dst->x && src->y == dst->y) return;
   board[dst->y][dst->x] = board[src->y][src->x];
   board[src->y][src->x] = EMPTY;
 }
@@ -253,6 +253,7 @@ bool isInRange(int y, int x) { return y >= 0 && y < 8 && x >= 0 && x < 8; }
 
 // TODO: add the rest of the pieces, but before that I need a move and ischeck
 // function to check if the move is valid or if the player is then in check
+
 Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
                       size_t *returnSize) {
   Coord **validMoves = malloc(100 * sizeof(Coord *)); // Adjust size as needed
@@ -342,7 +343,8 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
     printf("HELLO\n");
     for (int i = -1; i <= 1; ++i) {
       for (int j = -1; j <= 1; ++j) {
-        if (isInRange(xOrigin + i, yOrigin + j) && currPlayer != getPlayer(&board[yOrigin + i][xOrigin + j])) {
+        if (isInRange(xOrigin + i, yOrigin + j) &&
+            currPlayer != getPlayer(&board[yOrigin + i][xOrigin + j])) {
           validMoves[validMovesIndex] = malloc(sizeof(Coord));
           validMoves[validMovesIndex]->y = yOrigin + i;
           validMoves[validMovesIndex]->x = xOrigin + j;
@@ -356,14 +358,16 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
     printf("Knight\n");
     for (int i = 1; i <= 2; ++i) {
       for (int j = 1; j <= 2; ++j) {
-        if (isInRange(xOrigin + i, yOrigin + j) && currPlayer != getPlayer(&board[yOrigin + j][xOrigin + i])) {
+        if (isInRange(xOrigin + i, yOrigin + j) &&
+            currPlayer != getPlayer(&board[yOrigin + j][xOrigin + i])) {
           validMoves[validMovesIndex] = malloc(sizeof(Coord));
           validMoves[validMovesIndex]->y = yOrigin + j;
           validMoves[validMovesIndex]->x = xOrigin + i;
           ++validMovesIndex;
         }
 
-        if (isInRange(xOrigin + j, yOrigin + i) && currPlayer != getPlayer(&board[yOrigin + i][xOrigin + j])) {
+        if (isInRange(xOrigin + j, yOrigin + i) &&
+            currPlayer != getPlayer(&board[yOrigin + i][xOrigin + j])) {
           validMoves[validMovesIndex] = malloc(sizeof(Coord));
           validMoves[validMovesIndex]->y = yOrigin + i;
           validMoves[validMovesIndex]->x = xOrigin + j;
@@ -387,21 +391,21 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
   return validMoves;
 }
 
-//int main() {
-//  SquareTypes **board = createBoard();
-//  printf("Created board\n");
-//  printBoard(board);
-//  printf("Finished\n");
-//  printf("\n\n\n");
-//  Coord src = {0, 4};
-//  Coord dst = {2, 4};
-//  movePiece(board, &src, &dst);
-//  printBoard(board);
-//  size_t ret = 0;
-//  Coord **coord = getValidMoves(board, &dst, &ret);
-//  printf("Valid King Moves:\n");
-//  for (int i = 0; i < ret; ++i) {
-//    printf("(%d, %d)\n", coord[i]->x, coord[i]->y);
-//  }
-//  return EXIT_SUCCESS;
-//}
+// int main() {
+//   SquareTypes **board = createBoard();
+//   printf("Created board\n");
+//   printBoard(board);
+//   printf("Finished\n");
+//   printf("\n\n\n");
+//   Coord src = {0, 4};
+//   Coord dst = {2, 4};
+//   movePiece(board, &src, &dst);
+//   printBoard(board);
+//   size_t ret = 0;
+//   Coord **coord = getValidMoves(board, &dst, &ret);
+//   printf("Valid King Moves:\n");
+//   for (int i = 0; i < ret; ++i) {
+//     printf("(%d, %d)\n", coord[i]->x, coord[i]->y);
+//   }
+//   return EXIT_SUCCESS;
+// }
