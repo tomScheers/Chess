@@ -18,6 +18,6 @@ linux:
 	cp lib/linux/*.so bin
 	cp lib/linux/*.so.* bin
 
-	bear -- ccache clang -target x86_64-linux-gnu -Wl,-rpath=. $(CFLAGS) -o bin/$(EXE_NAME).x86_64 $(SRC) $(LINUX_SRC) $(INCLUDE)
+	bear -- ccache clang -target x86_64-linux-gnu -Wl,-rpath=. $(CFLAGS) -o bin/$(EXE_NAME).x86_64 $(SRC) $(LINUX_SRC) $(INCLUDE) $(LIBS) -Llib/linux -lGL
 
 .PHONY: linux
