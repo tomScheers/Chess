@@ -400,22 +400,3 @@ Game* initGame() {
   game->blackHasCastleRight = true;
   return game;
 }
-
-// int main() {
-//   SquareTypes **board = createBoard();
-//   printf("Created board\n");
-//   printBoard(board);
-//   printf("Finished\n");
-//   printf("\n\n\n");
-//   Coord src = {0, 4};
-//   Coord dst = {2, 4};
-//   movePiece(board, &src, &dst);
-//   printBoard(board);
-//   size_t ret = 0;
-//   Coord **coord = getValidMoves(board, &dst, &ret);
-//   printf("Valid King Moves:\n");
-//   for (int i = 0; i < ret; ++i) {
-//     printf("(%d, %d)\n", coord[i]->x, coord[i]->y);
-//   }
-//   return EXIT_SUCCESS;
-// }
