@@ -1,2 +1,3 @@
-lib
-vendor/*/build
+.cache/
+lib/
+vendor/*/*
