@@ -1,25 +1,23 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -g
+EXE_NAME = chess
 
-SRC_DIR = src
-OBJ_DIR = obj
-BIN_DIR = bin
+LINUX_SRC = src/system/platform_impl_sdl.c
 
-TARGET = $(BIN_DIR)/main
-SRC = $(wildcard $(SRC_DIR)/*.c)
-OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC))
+SRC = src/game/entry.c
 
-all: $(TARGET)
+INCLUDE = -Iinclude \
+	-Ivendor/sokol -Ivendor/sdl/include -Ivendor/cglm/include
 
-$(TARGET): $(OBJ)
-	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+LIBS = -lSDL3 -lcglm
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+CFLAGS = -O2 -Wall -Wextra -g
 
-clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
+all: linux
 
-.PHONY: all clean Makefile 
+linux:
+	mkdir -p bin
+	cp lib/linux/*.so bin
+	cp lib/linux/*.so.* bin
+
+	bear -- ccache clang -target x86_64-linux-gnu -Wl,-rpath=. $(CFLAGS) -o bin/$(EXE_NAME).x86_64 $(SRC) $(LINUX_SRC) $(INCLUDE)
+
+.PHONY: linux
