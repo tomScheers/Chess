@@ -8,9 +8,6 @@ SquareTypes **createBoard() {
   for (int i = 0; i < 8; ++i) {
     board[i] = (SquareTypes *)malloc(sizeof(SquareTypes) * 8);
   }
-  // yeah, I tried to generat
-  // Is vscode so buggy for you too
-  // It keeps giving me weird errors and it comments my code [the formatter]
   board[0][0] = WHITE_ROOK;
   board[0][1] = WHITE_KNIGHT;
   board[0][2] = WHITE_BISHOP;
@@ -22,7 +19,7 @@ SquareTypes **createBoard() {
   board[7][0] = BLACK_ROOK;
   board[7][1] = BLACK_KNIGHT;
   board[7][2] = BLACK_BISHOP;
-  board[7][3] = BLACK_KNIGHT;
+  board[7][3] = BLACK_QUEEN;
   board[7][4] = BLACK_KING;
   board[7][5] = BLACK_BISHOP;
   board[7][6] = BLACK_KNIGHT;
@@ -77,9 +74,7 @@ void printBoard(SquareTypes **board) {
 }
 
 bool isCheck(SquareTypes **board, Player player) {
-  printf("Checking check\n");
   SquareTypes king = player == WHITE ? WHITE_KING : BLACK_KING;
-  printf("Attacked king = %s\n", king == WHITE_KING ? "white" : "black");
   SquareTypes oposingRook = player == WHITE ? BLACK_ROOK : WHITE_ROOK;
   SquareTypes oposingQueen = player == WHITE ? BLACK_QUEEN : WHITE_QUEEN;
   SquareTypes oposingBishop = player == WHITE ? BLACK_BISHOP : WHITE_BISHOP;
@@ -90,16 +85,12 @@ bool isCheck(SquareTypes **board, Player player) {
   // needs to take that into acount
   int moveIncrement = player == WHITE ? 1 : -1;
 
-  printf("Checking check\n");
   Coord *kingCoords = (Coord *)malloc(sizeof(Coord));
   kingCoords->y = -1;
   kingCoords->x = -1;
   for (int y = 0; y < 8; ++y) {
     for (int x = 0; x < 8; ++x) {
-      printf("%d, %d\n", x, y);
-      printf("%u == %u\n", board[y][x], king);
       if (board[y][x] == king) {
-        printf("%d, %d\n", x, y);
         kingCoords->y = y;
         kingCoords->x = x;
         break;
@@ -114,22 +105,17 @@ bool isCheck(SquareTypes **board, Player player) {
     exit(EXIT_FAILURE);
   }
 
-  printf("%d, %d\n", kingCoords->x, kingCoords->y);
-  printf("Checking check\n");
   // Check for horizontal queen and rook checks
   // Check from right-hand side
   for (int y = kingCoords->y; y < 8; ++y) {
-    printf("%d, %d\n", y, kingCoords->x);
     if (board[y][kingCoords->x] == oposingRook ||
         board[y][kingCoords->x] == oposingQueen)
       return true;
     if (board[y][kingCoords->x] != EMPTY)
       break;
   }
-  printf("Checking check\n");
   // Check from left-hand side
   for (int y = kingCoords->y; y >= 0; --y) {
-    printf("%d, %d\n", y, kingCoords->x);
     if (board[y][kingCoords->x] == oposingRook ||
         board[y][kingCoords->x] == oposingQueen)
       return true;
@@ -137,7 +123,6 @@ bool isCheck(SquareTypes **board, Player player) {
       break;
   }
 
-  printf("Checking check\n");
   // Check for vertical queen and rook checks
   // Check from right-hand side
   for (int x = kingCoords->x; x >= 0; ++x) {
@@ -156,7 +141,6 @@ bool isCheck(SquareTypes **board, Player player) {
       break;
   }
 
-  printf("Checking check\n");
   // Check pawn checks
   if (board[kingCoords->y + moveIncrement][kingCoords->x + 1] == oposingPawn ||
       board[kingCoords->y + moveIncrement][kingCoords->x + 1] == oposingPawn)
@@ -195,7 +179,6 @@ bool isCheck(SquareTypes **board, Player player) {
       board[kingCoords->y - 1][kingCoords->x + 2] == oposingKnight)
     return true;
 
-  printf("Checking check\n");
   // Check for bishop and queen diagnol checks
   for (int i = kingCoords->x; i < 8; ++i) {
     if (kingCoords->y + i >= 8 || kingCoords->x + i >= 8)
@@ -218,6 +201,7 @@ bool isCheck(SquareTypes **board, Player player) {
   }
 
   for (int i = kingCoords->x; i >= 0; --i) {
+    if (isInRange(kingCoords->x + i, kingCoords->y + i));
     if (kingCoords->y + i >= 8 || kingCoords->x + i >= 8)
       break;
     if (board[kingCoords->y - i][kingCoords->x + i] == oposingBishop ||
@@ -240,9 +224,7 @@ bool isCheck(SquareTypes **board, Player player) {
 }
 
 void movePiece(SquareTypes **board, Coord *src, Coord *dst) {
-  printf("%d\n", board[dst->y][dst->x]);
   board[dst->y][dst->x] = board[src->y][src->x];
-  printf("%d\n", board[dst->y][dst->x]);
   board[src->y][src->x] = EMPTY;
 }
 
@@ -262,12 +244,12 @@ Player getPlayer(SquareTypes *square) {
   case BLACK_BISHOP:
   case BLACK_KNIGHT:
     return BLACK;
+  default:
+    return NONE;
   }
 }
 
-bool isInRange(int y, int x) {
-  return y >= 0 && y < 8 && x >= 0 && x < 8;
-}
+bool isInRange(int y, int x) { return y >= 0 && y < 8 && x >= 0 && x < 8; }
 
 // TODO: add the rest of the pieces, but before that I need a move and ischeck
 // function to check if the move is valid or if the player is then in check
@@ -281,6 +263,7 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
   // the piece to move if not, you can capture
   Player currPlayer = getPlayer(&board[pieceToMove->y][pieceToMove->x]);
   int pawnIncrement = currPlayer == WHITE ? 1 : -1;
+  printf("%d\n", board[pieceToMove->y][pieceToMove->x]);
   switch (board[pieceToMove->y][pieceToMove->x]) {
   case WHITE_PAWN:
   case BLACK_PAWN:
@@ -305,6 +288,8 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
       validMoves[validMovesIndex]->x = xOrigin - 1;
       ++validMovesIndex;
     }
+    break;
+
   case WHITE_ROOK:
   case BLACK_ROOK:
     for (int x = pieceToMove->x; x >= 0; --x) {
@@ -350,13 +335,14 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
       validMoves[validMovesIndex]->x = xOrigin;
       ++validMovesIndex;
     }
+    break;
 
   case WHITE_KING:
   case BLACK_KING:
+    printf("HELLO\n");
     for (int i = -1; i <= 1; ++i) {
       for (int j = -1; j <= 1; ++j) {
-        if (isInRange(xOrigin + i, yOrigin + j) && xOrigin +board[yOrigin + i][xOrigin + j] == EMPTY ||
-            currPlayer != getPlayer(&board[yOrigin + i][xOrigin + j])) {
+        if (isInRange(xOrigin + i, yOrigin + j) && currPlayer != getPlayer(&board[yOrigin + i][xOrigin + j])) {
           validMoves[validMovesIndex] = malloc(sizeof(Coord));
           validMoves[validMovesIndex]->y = yOrigin + i;
           validMoves[validMovesIndex]->x = xOrigin + j;
@@ -364,26 +350,58 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
         }
       }
     }
+    break;
+  case WHITE_KNIGHT:
+  case BLACK_KNIGHT:
+    printf("Knight\n");
+    for (int i = 1; i <= 2; ++i) {
+      for (int j = 1; j <= 2; ++j) {
+        if (isInRange(xOrigin + i, yOrigin + j) && currPlayer != getPlayer(&board[yOrigin + j][xOrigin + i])) {
+          validMoves[validMovesIndex] = malloc(sizeof(Coord));
+          validMoves[validMovesIndex]->y = yOrigin + j;
+          validMoves[validMovesIndex]->x = xOrigin + i;
+          ++validMovesIndex;
+        }
+
+        if (isInRange(xOrigin + j, yOrigin + i) && currPlayer != getPlayer(&board[yOrigin + i][xOrigin + j])) {
+          validMoves[validMovesIndex] = malloc(sizeof(Coord));
+          validMoves[validMovesIndex]->y = yOrigin + i;
+          validMoves[validMovesIndex]->x = xOrigin + j;
+          ++validMovesIndex;
+        }
+      }
+      break;
+    }
+    if (isInRange(xOrigin + 2, yOrigin + 1) &&
+        currPlayer != getPlayer(&board[yOrigin + 1][xOrigin + 2])) {
+      validMoves[validMovesIndex] = malloc(sizeof(Coord));
+      validMoves[validMovesIndex]->y = yOrigin + 1;
+      validMoves[validMovesIndex]->x = xOrigin + 2;
+      ++validMovesIndex;
+    }
+    break;
+  default:
+    printf("What??\n");
   }
   *returnSize = validMovesIndex; // Note: returnSize is now a pointer
   return validMoves;
 }
 
-int main() {
-  SquareTypes **board = createBoard();
-  printf("Created board\n");
-  printBoard(board);
-  printf("Finished\n");
-  printf("\n\n\n");
-  Coord src = {0, 4};
-  Coord dst = {5, 3};
-  movePiece(board, &src, &dst);
-  printBoard(board);
-  size_t ret = 0;
-  Coord* coord = *getValidMoves(board, &src, &ret);
-  printf("Valid King Moves:\n");
-  for (int i = 0; i < ret; ++i) {
-    printf("(%d, %d)", coord->x, coord->y);
-  }
-  return EXIT_SUCCESS;
-}
+//int main() {
+//  SquareTypes **board = createBoard();
+//  printf("Created board\n");
+//  printBoard(board);
+//  printf("Finished\n");
+//  printf("\n\n\n");
+//  Coord src = {0, 4};
+//  Coord dst = {2, 4};
+//  movePiece(board, &src, &dst);
+//  printBoard(board);
+//  size_t ret = 0;
+//  Coord **coord = getValidMoves(board, &dst, &ret);
+//  printf("Valid King Moves:\n");
+//  for (int i = 0; i < ret; ++i) {
+//    printf("(%d, %d)\n", coord[i]->x, coord[i]->y);
+//  }
+//  return EXIT_SUCCESS;
+//}
