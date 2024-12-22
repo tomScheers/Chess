@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 typedef enum SquareTypes
 {
@@ -18,8 +19,7 @@ typedef enum SquareTypes
 	WHITE_KNIGHT,
 } SquareTypes;
 
-typedef enum Player
-{
+typedef enum Player {
 	WHITE,
 	BLACK,
 	NONE,
@@ -29,6 +29,14 @@ typedef struct Coord {
 	int y;
 	int x;
 } Coord;
+
+typedef struct Game {
+	SquareTypes** board;
+	bool whiteHasCastleRight;
+	bool blackHasCastleRight;
+	Player currPlayer;
+	time_t startTime;
+} Game;
 
 SquareTypes** createBoard();
 void printBoard(SquareTypes **board);

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 SquareTypes **createBoard() {
   SquareTypes **board = (SquareTypes **)malloc(sizeof(SquareTypes *) * 8);
   for (int i = 0; i < 8; ++i) {
@@ -387,8 +388,17 @@ Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove,
   default:
     printf("What??\n");
   }
-  *returnSize = validMovesIndex; // Note: returnSize is now a pointer
+  *returnSize = validMovesIndex;
   return validMoves;
+}
+
+Game* initGame() {
+  Game* game = (Game*)malloc(sizeof(Game));
+  game->board = createBoard();
+  game->currPlayer = WHITE;
+  game->whiteHasCastleRight = true;
+  game->blackHasCastleRight = true;
+  return game;
 }
 
 // int main() {
