@@ -1,3 +1,4 @@
 .cache/
 lib/
 vendor/*/*
+compile_commands.json
