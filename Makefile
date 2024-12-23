@@ -2,12 +2,12 @@ EXE_NAME = chess
 
 LINUX_SRC = src/system/platform_impl_sdl.c
 
-SRC = src/game/entry.c
+SRC = src/game/entry.c src/game/config.c
 
 INCLUDE = -Iinclude \
-	-Ivendor/sokol -Ivendor/sdl/include -Ivendor/cglm/include
+	-Ivendor/sokol -Ivendor/sdl/include -Ivendor/cglm/include -Ivendor/cJSON
 
-LIBS = -lSDL3 -lcglm
+LIBS = -lSDL3 -lcglm -lcjson
 
 CFLAGS = -O2 -Wall -Wextra -g
 

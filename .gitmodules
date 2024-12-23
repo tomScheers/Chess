@@ -7,3 +7,6 @@
 [submodule "sokol"]
 	path = vendor/sokol
 	url = https://github.com/floooh/sokol
+[submodule "cJSON"]
+	path = vendor/cJSON
+	url = https://github.com/DaveGamble/cJSON
