@@ -1,4 +1,4 @@
-#include <game/config.h>
+#include <game/user_config.h>
 #include <system/util.h>
 
 #include <cJSON.h>
