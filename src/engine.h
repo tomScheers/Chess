@@ -26,8 +26,8 @@ typedef enum Player {
 } Player;
 
 typedef struct Coord {
-	int y;
 	int x;
+	int y;
 } Coord;
 
 typedef struct Game {
@@ -36,12 +36,13 @@ typedef struct Game {
 	bool blackHasCastleRight;
 	Player currPlayer;
 	time_t startTime;
+	Coord* enPassantSquare;
 } Game;
 
 SquareTypes** createBoard();
-void printBoard(SquareTypes **board);
-Coord **getValidMoves(SquareTypes **board, Coord *pieceToMove, size_t *returnSize);
-void movePiece(SquareTypes **board, Coord *src, Coord *dst);
-bool isCheck(SquareTypes **board, Player player);
-Player getPlayer(SquareTypes *square);
-bool isInRange(int x, int y);
+void printBoard(Game *game);
+Coord **getValidMoves(Game *game, Coord *pieceToMove, size_t *returnSize);
+void movePiece(SquareTypes **game, Coord *src, Coord *dst);
+bool isCheck(Game *game, Player player);
+bool isCurrPlayerCheck(Game *game);
+Game* initGame();
