@@ -1,4 +1,5 @@
 #include "../../src/engine_internal.h"
+#include <alloca.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,8 +35,8 @@ void testCreateBoard() {
 
 void testMovePiece() {
   CE_Game *game = CE_initGame();
-  CE_Coord *src = (CE_Coord *)malloc(sizeof(CE_Coord));
-  CE_Coord *dst = (CE_Coord *)malloc(sizeof(CE_Coord));
+  CE_Coord *src = (CE_Coord *)alloca(sizeof(CE_Coord));
+  CE_Coord *dst = (CE_Coord *)alloca(sizeof(CE_Coord));
   src->y = 1;
   src->x = 0;
   dst->y = 2;
@@ -78,19 +79,15 @@ void testMovePiece() {
     for (int j = 0; j < 8; ++j) {
       assert(game->board[i][j] == expectedBoard[i][j]);
     }
-    free(game->board[i]);
   }
-  free(game->board);
-  free(src);
-  free(dst);
-  free(game);
+  CE_freeGame(game);
 }
 
 void testIsCheck() {
   // General tests
   CE_Game *game = CE_initGame();
-  CE_Coord *src = (CE_Coord *)malloc(sizeof(CE_Coord));
-  CE_Coord *dst = (CE_Coord *)malloc(sizeof(CE_Coord));
+  CE_Coord *src = alloca(sizeof(CE_Coord));
+  CE_Coord *dst = alloca(sizeof(CE_Coord));
 
   // Move white king to the centre
   src->x = 4;
@@ -250,8 +247,8 @@ void testIsCheck() {
   CE__movePiece(game, src, dst);
 
   // Piece used to test if blocking a check with a piece works
-  CE_Coord *blockPieceSrc = (CE_Coord *)malloc(sizeof(CE_Coord));
-  CE_Coord *blockPieceDst = (CE_Coord *)malloc(sizeof(CE_Coord));
+  CE_Coord *blockPieceSrc = alloca(sizeof(CE_Coord));
+  CE_Coord *blockPieceDst = alloca(sizeof(CE_Coord));
 
   // Bishop Checks
   src->x = 2;
@@ -536,6 +533,14 @@ void testIsCheck() {
 void assertValidMoves(CE_Coord **expected, size_t expectedSize,
                       CE_Coord **given, size_t givenSize) {
   printf("expectedSize: %zu, givenSize: %zu\n", expectedSize, givenSize);
+  printf("Expected moves: \n");
+  for (int i = 0; i < expectedSize; ++i) {
+    printf("(%d, %d)\n", expected[i]->x, expected[i]->y);
+  }
+  printf("Given moves: \n");
+  for (int i = 0; i < givenSize; ++i) {
+    printf("(%d, %d)\n", given[i]->x, given[i]->y);
+  }
   assert(expectedSize == givenSize);
   for (size_t i = 0; i < givenSize; ++i) {
     assert(given[i] != NULL);
@@ -545,8 +550,6 @@ void assertValidMoves(CE_Coord **expected, size_t expectedSize,
     CE_Coord *givenCoord = given[i];
     bool isGiven = false;
     for (size_t j = 0; j < expectedSize; ++j) {
-      printf("(%d, %d) == (%d, %d)\n", givenCoord->x, givenCoord->y,
-             expected[j]->x, expected[j]->y);
       if (givenCoord->x == expected[j]->x && givenCoord->y == expected[j]->y) {
         isGiven = true;
         break;
@@ -597,7 +600,8 @@ void testGetValidMoves() {
   // Test for en passant
   CE__movePiece(game, &(CE_Coord){1, 5}, &(CE_Coord){1, 4});
   CE__movePiece(game, &(CE_Coord){2, 6}, &(CE_Coord){2, 4});
-  game->enPassantSquare = &(CE_Coord){2, 5};
+  game->enPassantSquare->x = 2;
+  game->enPassantSquare->y = 5;
 
   size_t retSize3 = 0;
   CE_Coord **validMoves3 = CE_getValidMoves(game, &(CE_Coord){1, 4}, &retSize3);
@@ -614,6 +618,7 @@ void testGetValidMoves() {
   assertValidMoves(expected3, 2, validMoves3, retSize3);
 
   // Reset board
+  free(game->board);
   game->board = CE__createBoard();
 
   // Rook Tests
@@ -647,6 +652,7 @@ void testGetValidMoves() {
   assertValidMoves(expected4, 11, validMoves5, retSize5);
 
   // Reset board
+  free(game->board);
   game->board = CE__createBoard();
 
   // Bishop tests
@@ -679,6 +685,7 @@ void testGetValidMoves() {
   assertValidMoves(expectedC1, 8, givenCoords, retSize7);
 
   // Reset board
+  free(game->board);
   game->board = CE__createBoard();
 
   // Knight tests
@@ -718,6 +725,7 @@ void testGetValidMoves() {
   assertValidMoves(expectedK1, 8, givenCoords2, givenSize1);
 
   // Reset board
+  free(game->board);
   game->board = CE__createBoard();
 
   // Queen test
@@ -759,6 +767,7 @@ void testGetValidMoves() {
   assertValidMoves(expected5, 19, givenMoves4, retSize9);
 
   // Reset board
+  free(game->board);
   game->board = CE__createBoard();
 
   // King test
@@ -784,6 +793,7 @@ void testGetValidMoves() {
   CE__printBoard(game);
   assertValidMoves(expectedKingMoves, 2, validKingMoves2, kingRetSize2);
 
+  free(game->board);
   game->board = CE__createBoard();
 
   // Check for castling
@@ -812,6 +822,8 @@ void testGetValidMoves() {
   CE__printBoard(game);
   assertValidMoves(expectedCastlingMoves, 4, validCastlingMoves,
                    castlingMovesSize);
+  CE_freeGame(game);
+  printf("Freed game successfully\n");
 }
 
 void simGame() {
@@ -830,7 +842,7 @@ void simGame() {
       switch (action) {
       case 1:
         printf("Get valid moves for a piece: \n");
-        CE_Coord *validMovesToGet = (CE_Coord *)malloc(sizeof(CE_Coord));
+        CE_Coord *validMovesToGet = alloca(sizeof(CE_Coord));
         printf("Enter valid coordinates for piece (x, y): ");
         scanf("%d, ", &validMovesToGet->x);
         scanf("%d", &validMovesToGet->y);
@@ -841,18 +853,18 @@ void simGame() {
         for (int i = 0; i < validMovesSize; ++i) {
           printf("%d: (%d, %d)\n", i, validMoves[i]->x, validMoves[i]->y);
         }
-        free(validMoves);
         break;
       case 2:
         printf("Move Piece: \n");
         printf("Piece to move: \n");
-        CE_Coord *pieceToMove = (CE_Coord *)malloc(sizeof(CE_Coord));
+        CE_Coord *pieceToMove = alloca(sizeof(CE_Coord));
         printf("Enter valid coordinates for piece to move (x, y): ");
         scanf("%d, ", &pieceToMove->x);
         scanf("%d", &pieceToMove->y);
         printf("Square to move to: \n");
-        CE_Coord *squareToMoveTo = (CE_Coord *)malloc(sizeof(CE_Coord));
-        printf("Enter valid coordinates for the square you want to move to (x, y): ");
+        CE_Coord *squareToMoveTo = alloca(sizeof(CE_Coord));
+        printf("Enter valid coordinates for the square you want to move to (x, "
+               "y): ");
         scanf("%d, ", &squareToMoveTo->x);
         scanf("%d", &squareToMoveTo->y);
         if (CE_makeValidMove(game, pieceToMove, squareToMoveTo)) {
@@ -860,8 +872,6 @@ void simGame() {
         } else {
           printf("Move must be valid\n");
         }
-        free(squareToMoveTo);
-        free(pieceToMove);
         break;
       default:
         printf("Invalid action\n");
@@ -870,20 +880,33 @@ void simGame() {
     }
     state = CE_getGameState(game);
     switch (state) {
-      case CE_STATE_ONGOING:
-        printf("On going\n");
-        break;
-      case CE_STATE_STALEMATE:
-        printf("Stalemate\n");
-        break;
-      case CE_STATE_CHECKMATED:
-        printf("Checkmate\n");
-        break;
+    case CE_STATE_ONGOING:
+      printf("On going\n");
+      break;
+    case CE_STATE_STALEMATE:
+      printf("Stalemate\n");
+      break;
+    case CE_STATE_CHECKMATED:
+      printf("Checkmate\n");
+      break;
     }
   }
+  if (state == CE_STATE_CHECKMATED) {
+    if (game->currPlayer == CE_WHITE_PLAYER) {
+      printf("Black has won by checkmate!\n");
+    } else {
+      printf("White has won by checkmate!\n");
+    }
+  } else {
+    printf("Draw by stalemate\n");
+  }
+  CE_freeGame(game);
 }
 
 int main() {
+  CE_Game *testGame = CE_initGame();
+  CE_freeGame(testGame);
+  printf("Free game test passed!\n");
   testCreateBoard();
   printf("Create Board test passed!\n");
   testMovePiece();

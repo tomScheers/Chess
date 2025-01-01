@@ -52,5 +52,6 @@ CE_Game* CE_initGame();
 CE_Coord** CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove, size_t *returnSize);
 bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst);
 CE_GameState CE_getGameState(CE_Game *game);
+void CE_freeGame(CE_Game *game);
 
 #endif
