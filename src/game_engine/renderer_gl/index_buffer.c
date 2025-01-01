@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-GE_IndexBuffer_t GE_IndexBufferCreate(const unsigned int *data, const unsigned int count) {
+GE_IndexBuffer_t GameEngine_IndexBufferCreate(const unsigned int *data, const unsigned int count) {
     GE_IndexBuffer_t index_buffer;
     index_buffer.count = count;
     glGenBuffers(1, &index_buffer.id);
@@ -11,14 +11,14 @@ GE_IndexBuffer_t GE_IndexBufferCreate(const unsigned int *data, const unsigned i
     return index_buffer;
 }
 
-void GE_IndexBufferDestroy(GE_IndexBuffer_t *index_buffer) {
+void GameEngine_IndexBufferDestroy(GE_IndexBuffer_t *index_buffer) {
     glDeleteBuffers(1, &index_buffer->id);
 }
 
-void GE_IndexBufferBind(const GE_IndexBuffer_t *index_buffer) {
+void GameEngine_IndexBufferBind(const GE_IndexBuffer_t *index_buffer) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->id);
 }
 
-void GE_IndexBufferUnbind() {
+void GameEngine_IndexBufferUnbind() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }

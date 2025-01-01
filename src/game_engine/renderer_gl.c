@@ -11,9 +11,6 @@ GE_Renderer_t GE_g_renderer = {0};
 
 void GameEngine_RendererResizeCallback(int width, int height) {
     glViewport(0, 0, width, height);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    SDL_GL_SwapWindow(GE_g_app.display);
 }
 
 void GameEngine_RendererInit() {
