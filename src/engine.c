@@ -4,6 +4,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+CE_GameState CE_getGameState(CE_Game *game) {
+  bool isInCheck = CE__isCheck(game, game->currPlayer);
+  bool hasValidMoves = false;
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j < 8; ++j) {
+      if (CE__getPlayer(&game->board[i][j]) == game->currPlayer) {
+        size_t validMoves = 0;
+        CE_getValidMoves(game, &(CE_Coord){i, j}, &validMoves);
+        if (validMoves > 0) {
+          hasValidMoves = true;
+          break;
+        }
+      }
+      if (hasValidMoves)
+        break;
+    }
+  }
+  if (isInCheck)
+    return CE_STATE_CHECKMATED;
+  if (hasValidMoves)
+    return CE_STATE_ONGOING;
+  return CE_STATE_STALEMATE;
+}
+
 CE_Game *CE_initGame() {
   CE_Game *game = (CE_Game *)malloc(sizeof(CE_Game));
   game->board = CE__createBoard();
@@ -47,10 +71,25 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
     if (game->currPlayer == CE_WHITE_PLAYER) {
       game->whiteHasCastleRight[0] = false;
       game->whiteHasCastleRight[1] = false;
+      if (src->x == 4 && src->y == 0) {
+        if (dst->x == 2) {
+          CE__movePiece(game, &(CE_Coord){0, 0}, &(CE_Coord){3, 0});
+        } else if (dst->x == 6) {
+          CE__movePiece(game, &(CE_Coord){7, 0}, &(CE_Coord){5, 0});
+        }
+      }
     } else {
       game->blackHasCastleRight[0] = false;
       game->blackHasCastleRight[1] = false;
+      if (src->x == 4 && src->y == 7) {
+        if (dst->x == 2) {
+          CE__movePiece(game, &(CE_Coord){0, 7}, &(CE_Coord){3, 7});
+        } else if (dst->x == 6) {
+          CE__movePiece(game, &(CE_Coord){7, 7}, &(CE_Coord){5, 7});
+        }
+      }
     }
+
     break;
   case CE_BLACK_ROOK:
   case CE_WHITE_ROOK:
@@ -72,7 +111,8 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
     break;
   }
   CE__movePiece(game, src, dst);
-  game->currPlayer = game->currPlayer == CE_WHITE_PLAYER ? CE_BLACK_PLAYER : CE_WHITE_PLAYER;
+  game->currPlayer =
+      game->currPlayer == CE_WHITE_PLAYER ? CE_BLACK_PLAYER : CE_WHITE_PLAYER;
   return true;
 }
 
@@ -98,7 +138,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
   CE_Player oppPlayer =
       currPlayer == CE_WHITE_PLAYER ? CE_BLACK_PLAYER : CE_WHITE_PLAYER;
   int pawnIncrement = currPlayer == CE_WHITE_PLAYER ? 1 : -1;
-  CE__printBoard(game);
   switch (board[yOrigin][xOrigin]) {
   case CE_EMPTY:
     break;
@@ -193,14 +232,14 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
 
   case CE_WHITE_BISHOP:
   case CE_BLACK_BISHOP:
-    for (int i = 1; i < 7 - xOrigin; ++i) {
+    for (int i = 1; i <= 7 - xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin + i, yOrigin + i}, validMoves,
                          &validMovesIndex))
         break;
     }
 
-    for (int i = 1; i < 7 - xOrigin; ++i) {
+    for (int i = 1; i <= 7 - xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin + i, yOrigin - i}, validMoves,
                          &validMovesIndex))
@@ -296,14 +335,14 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
     break;
   case CE_WHITE_QUEEN:
   case CE_BLACK_QUEEN:
-    for (int i = 1; i < 7 - xOrigin; ++i) {
+    for (int i = 1; i <= 7 - xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin + i, yOrigin + i}, validMoves,
                          &validMovesIndex))
         break;
     }
 
-    for (int i = 1; i < 7 - xOrigin; ++i) {
+    for (int i = 1; i <= 7 - xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin + i, yOrigin - i}, validMoves,
                          &validMovesIndex))
@@ -397,30 +436,30 @@ void CE__printBoard(CE_Game *game) {
       switch (board[i][j]) {
       case CE_WHITE_ROOK:
       case CE_BLACK_ROOK:
-        printf("Rook ");
+        printf("R");
         break;
       case CE_WHITE_KNIGHT:
       case CE_BLACK_KNIGHT:
-        printf("Knight ");
+        printf("H");
         break;
       case CE_WHITE_BISHOP:
       case CE_BLACK_BISHOP:
-        printf("Bishop ");
+        printf("B");
         break;
       case CE_WHITE_QUEEN:
       case CE_BLACK_QUEEN:
-        printf("Queen ");
+        printf("Q");
         break;
       case CE_WHITE_KING:
       case CE_BLACK_KING:
-        printf("King ");
+        printf("K");
         break;
       case CE_WHITE_PAWN:
       case CE_BLACK_PAWN:
-        printf("Pawn ");
+        printf("P");
         break;
       case CE_EMPTY:
-        printf("Empty ");
+        printf("E");
         break;
       }
     }
@@ -465,7 +504,6 @@ bool CE__isCheck(CE_Game *game, CE_Player player) {
   }
 
   if (kingCoords->y == -1) {
-    CE__printBoard(game);
     fprintf(stderr, "No kingcoords\n");
     exit(EXIT_FAILURE);
   }
@@ -610,19 +648,12 @@ bool CE__isCurrPlayerCheck(CE_Game *game) {
 }
 
 void CE__movePiece(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
-  printf("HELLO\n");
-  printf("move: (%d, %d) -> (%d, %d)\n", src->x, src->y, dst->x, dst->y);
-  CE__printBoard(game);
-  printf("\n\n");
   if (src->x == dst->x && src->y == dst->y)
     return;
   CE_SquareTypes **board = game->board;
 
   board[dst->y][dst->x] = board[src->y][src->x];
   board[src->y][src->x] = CE_EMPTY;
-  printf("dst: %d\n", board[dst->y][dst->x]);
-  printf("src: %d\n", board[src->y][src->x]);
-  CE__printBoard(game);
 }
 
 CE_Player CE__getPlayer(CE_SquareTypes *square) {
@@ -662,11 +693,13 @@ CE_Game *CE__cpMovePiece(CE_Game *game, CE_Coord *dst, CE_Coord *src) {
 // Function to see if can make default move, AKA direct capture or empty square
 bool CE__canMoveTo(CE_Game *game, CE_Coord *pieceToMove, CE_Coord *moveTo,
                    CE_Coord **validMovesArr, size_t *validMovesSize) {
-
   bool inRange = CE__isInRange(moveTo->x, moveTo->y);
 
-  if (!inRange)
+  if (!inRange) {
+    printf("Out of range\n");
+    printf("(%d, %d)\n", moveTo->x, moveTo->y);
     return false;
+  }
 
   bool isSamePlayer =
       CE__getPlayer(&game->board[moveTo->y][moveTo->x]) ==
@@ -679,8 +712,10 @@ bool CE__canMoveTo(CE_Game *game, CE_Coord *pieceToMove, CE_Coord *moveTo,
       CE__isCheck(CE__cpMovePiece(game, pieceToMove, moveTo),
                   CE__getPlayer(&game->board[pieceToMove->y][pieceToMove->x]));
 
-  if (isCheckAfterMove)
+  if (isCheckAfterMove) {
+    printf("is check\n");
     return false;
+  }
 
   validMovesArr[*validMovesSize] = (CE_Coord *)malloc(sizeof(CE_Coord));
   validMovesArr[*validMovesSize]->y = moveTo->y;

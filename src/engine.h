@@ -31,6 +31,7 @@ typedef enum Player {
 typedef enum {
 	CE_STATE_STALEMATE,
 	CE_STATE_ONGOING,
+	CE_STATE_CHECKMATED,
 } CE_GameState;
 
 typedef struct {

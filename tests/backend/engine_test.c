@@ -33,7 +33,7 @@ void testCreateBoard() {
 }
 
 void testMovePiece() {
-  CE_Game* game = CE_initGame();
+  CE_Game *game = CE_initGame();
   CE_Coord *src = (CE_Coord *)malloc(sizeof(CE_Coord));
   CE_Coord *dst = (CE_Coord *)malloc(sizeof(CE_Coord));
   src->y = 1;
@@ -44,7 +44,8 @@ void testMovePiece() {
   src->y = 7;
   src->x = 4;
   dst->x = 0;
-  dst->y = 0; CE__movePiece(game, src, dst);
+  dst->y = 0;
+  CE__movePiece(game, src, dst);
   src->y = 6;
   src->x = 7;
   dst->y = 5;
@@ -532,8 +533,8 @@ void testIsCheck() {
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 }
 
-void assertValidMoves(CE_Coord **expected, size_t expectedSize, CE_Coord **given,
-                      size_t givenSize) {
+void assertValidMoves(CE_Coord **expected, size_t expectedSize,
+                      CE_Coord **given, size_t givenSize) {
   printf("expectedSize: %zu, givenSize: %zu\n", expectedSize, givenSize);
   assert(expectedSize == givenSize);
   for (size_t i = 0; i < givenSize; ++i) {
@@ -682,7 +683,8 @@ void testGetValidMoves() {
 
   // Knight tests
   size_t givenSize = 0;
-  CE_Coord **givenCoords1 = CE_getValidMoves(game, &(CE_Coord){1, 0}, &givenSize);
+  CE_Coord **givenCoords1 =
+      CE_getValidMoves(game, &(CE_Coord){1, 0}, &givenSize);
 
   CE_Coord k1 = {0, 2};
   CE_Coord k2 = {2, 2};
@@ -697,7 +699,8 @@ void testGetValidMoves() {
   CE__movePiece(game, &((CE_Coord){1, 0}), &((CE_Coord){4, 4}));
 
   size_t givenSize1 = 0;
-  CE_Coord **givenCoords2 = CE_getValidMoves(game, &(CE_Coord){4, 4}, &givenSize1);
+  CE_Coord **givenCoords2 =
+      CE_getValidMoves(game, &(CE_Coord){4, 4}, &givenSize1);
 
   CE_Coord k3 = {3, 2};
   CE_Coord k4 = {5, 2};
@@ -811,6 +814,75 @@ void testGetValidMoves() {
                    castlingMovesSize);
 }
 
+void simGame() {
+  CE_Game *game = CE_initGame();
+  CE_GameState state = CE_getGameState(game);
+  while (state == CE_STATE_ONGOING) {
+    CE__printBoard(game);
+    printf("Curr Player: %s\n",
+           game->currPlayer == CE_WHITE_PLAYER ? "White" : "Black");
+    bool running = true;
+    while (running) {
+      printf("Perform Action:\n1: getValidMoves\n2: makeValidMove\n");
+      int action;
+      printf("Enter action you'd like to perform: ");
+      scanf("%d", &action);
+      switch (action) {
+      case 1:
+        printf("Get valid moves for a piece: \n");
+        CE_Coord *validMovesToGet = (CE_Coord *)malloc(sizeof(CE_Coord));
+        printf("Enter valid coordinates for piece (x, y): ");
+        scanf("%d, ", &validMovesToGet->x);
+        scanf("%d", &validMovesToGet->y);
+        size_t validMovesSize = 0;
+        CE_Coord **validMoves =
+            CE_getValidMoves(game, validMovesToGet, &validMovesSize);
+        printf("Valid Moves:\n");
+        for (int i = 0; i < validMovesSize; ++i) {
+          printf("%d: (%d, %d)\n", i, validMoves[i]->x, validMoves[i]->y);
+        }
+        free(validMoves);
+        break;
+      case 2:
+        printf("Move Piece: \n");
+        printf("Piece to move: \n");
+        CE_Coord *pieceToMove = (CE_Coord *)malloc(sizeof(CE_Coord));
+        printf("Enter valid coordinates for piece to move (x, y): ");
+        scanf("%d, ", &pieceToMove->x);
+        scanf("%d", &pieceToMove->y);
+        printf("Square to move to: \n");
+        CE_Coord *squareToMoveTo = (CE_Coord *)malloc(sizeof(CE_Coord));
+        printf("Enter valid coordinates for the square you want to move to (x, y): ");
+        scanf("%d, ", &squareToMoveTo->x);
+        scanf("%d", &squareToMoveTo->y);
+        if (CE_makeValidMove(game, pieceToMove, squareToMoveTo)) {
+          running = false;
+        } else {
+          printf("Move must be valid\n");
+        }
+        free(squareToMoveTo);
+        free(pieceToMove);
+        break;
+      default:
+        printf("Invalid action\n");
+        break;
+      }
+    }
+    state = CE_getGameState(game);
+    switch (state) {
+      case CE_STATE_ONGOING:
+        printf("On going\n");
+        break;
+      case CE_STATE_STALEMATE:
+        printf("Stalemate\n");
+        break;
+      case CE_STATE_CHECKMATED:
+        printf("Checkmate\n");
+        break;
+    }
+  }
+}
+
 int main() {
   testCreateBoard();
   printf("Create Board test passed!\n");
@@ -820,5 +892,6 @@ int main() {
   printf("Is Check test passed!\n");
   testGetValidMoves();
   printf("Get valid moves test passed!\n");
+  simGame();
   return EXIT_SUCCESS;
 }
