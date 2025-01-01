@@ -1,4 +1,5 @@
 #include <game_engine/renderer.h>
+#include <game_engine/renderer/vertex_array.h>
 #include <game_engine/app.h>
 
 #include <SDL3/SDL.h>
@@ -35,4 +36,13 @@ void GameEngine_RendererInit() {
 
 void GameEngine_RendererQuit() {
     SDL_GL_DestroyContext(GE_g_renderer.context);
+}
+
+void GameEngine_RendererDraw(const GE_VertexArray_t *vao, const GE_IndexBuffer_t *ibo, const GE_Shader_t *shader) {
+    GameEngine_ShaderUse(shader);
+
+    glBindVertexArray(vao->id);
+    GameEngine_IndexBufferBind(ibo);
+
+    glDrawElements(GL_TRIANGLES, ibo->count, GL_UNSIGNED_INT, NULL);
 }
