@@ -1,4 +1,4 @@
 .cache/
+bin/
 lib/
-vendor/*/*
 compile_commands.json
