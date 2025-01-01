@@ -29,10 +29,7 @@ GE_Shader_t shader;
 void mainloop() {
     GameEngine_AppProcess();
 
-// Testing
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
+    GameEngine_RendererClear();
     GameEngine_RendererDraw(&vao, &ibo, &shader);
 
     SDL_GL_SwapWindow(GE_g_app.display);
@@ -51,6 +48,8 @@ int main() {
 
     ibo = GameEngine_IndexBufferCreate(indices, 6);
     GameEngine_ShaderInit(&shader, "data/shaders/engine/basic.vert", "data/shaders/engine/basic.frag");
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(mainloop, 60, 1);

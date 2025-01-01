@@ -38,6 +38,10 @@ void GameEngine_RendererQuit() {
     SDL_GL_DestroyContext(GE_g_renderer.context);
 }
 
+void GameEngine_RendererClear() {
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
 void GameEngine_RendererDraw(const GE_VertexArray_t *vao, const GE_IndexBuffer_t *ibo, const GE_Shader_t *shader) {
     GameEngine_ShaderUse(shader);
 
