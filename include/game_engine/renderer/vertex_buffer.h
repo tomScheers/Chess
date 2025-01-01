@@ -4,7 +4,7 @@ typedef struct {
     unsigned int id;
 } GE_VertexBuffer_t;
 
-GE_VertexBuffer_t GameEngine_VertexBufferCreate(const void *data, unsigned int size);
+GE_VertexBuffer_t GameEngine_VertexBufferCreate(const void *data, const unsigned int size);
 void GameEngine_VertexBufferDestroy(GE_VertexBuffer_t *vertex_buffer);
 
 void GameEngine_VertexBufferBind(const GE_VertexBuffer_t *vertex_buffer);

@@ -14,7 +14,7 @@ SRC = src/glad/glad.c \
 	$(APP_SRC)
 
 IMPL_DESKTOP = src/game_engine/app_desktop.c \
-	src/game_engine/renderer_gl.c src/game_engine/renderer_gl/vertex_buffer.c
+	src/game_engine/renderer_gl.c src/game_engine/renderer_gl/*.c
 
 all: linux
 

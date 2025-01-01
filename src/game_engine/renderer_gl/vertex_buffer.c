@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-GE_VertexBuffer_t GE_VertexBufferCreate(const void *data, unsigned int size) {
+GE_VertexBuffer_t GE_VertexBufferCreate(const void *data, const unsigned int size) {
     GE_VertexBuffer_t vertex_buffer;
     glGenBuffers(1, &vertex_buffer.id);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer.id);
