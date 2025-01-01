@@ -24,7 +24,7 @@ static unsigned int CompileShader(unsigned int type, const char* source) {
     return shader;
 }
 
-int GameEngine_ShaderInit(GE_Shader_t *program, const char *vs_file_path, const char *fs_file_path) {
+int GameEngine_ShaderInit(GE_Shader_t *shader, const char *vs_file_path, const char *fs_file_path) {
     char *vs_source = (char *)GameEngine_ReadFile(vs_file_path);
     char *fs_source = (char *)GameEngine_ReadFile(fs_file_path);
 
@@ -44,19 +44,19 @@ int GameEngine_ShaderInit(GE_Shader_t *program, const char *vs_file_path, const 
         return 0;
     }
 
-    program->id = glCreateProgram();
-    glAttachShader(program->id, vertexShader);
-    glAttachShader(program->id, fragmentShader);
-    glLinkProgram(program->id);
+    shader->id = glCreateProgram();
+    glAttachShader(shader->id, vertexShader);
+    glAttachShader(shader->id, fragmentShader);
+    glLinkProgram(shader->id);
 
     int success;
     char infoLog[512];
-    glGetProgramiv(program->id, GL_LINK_STATUS, &success);
+    glGetProgramiv(shader->id, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(program->id, sizeof(infoLog), NULL, infoLog);
+        glGetProgramInfoLog(shader->id, sizeof(infoLog), NULL, infoLog);
         fprintf(stderr, "Program linking failed: %s\n", infoLog);
-        glDeleteProgram(program->id);
-        program->id = 0;
+        glDeleteProgram(shader->id);
+        shader->id = 0;
         return 0;
     }
 
@@ -66,17 +66,17 @@ int GameEngine_ShaderInit(GE_Shader_t *program, const char *vs_file_path, const 
     return 1;
 }
 
-void GameEngine_ShaderDestroy(GE_Shader_t *program) {
-    glDeleteProgram(program->id);
-    program->id = 0;
+void GameEngine_ShaderDestroy(GE_Shader_t *shader) {
+    glDeleteProgram(shader->id);
+    shader->id = 0;
 }
 
-void GameEngine_ShaderUse(const GE_Shader_t *program) {
-    glUseProgram(program->id);
+void GameEngine_ShaderUse(const GE_Shader_t *shader) {
+    glUseProgram(shader->id);
 }
 
-void GameEngine_ShaderSetUniformFloat(const GE_Shader_t *program, const char *name, float value) {
-    int location = glGetUniformLocation(program->id, name);
+void GameEngine_ShaderSetUniformFloat(const GE_Shader_t *shader, const char *name, float value) {
+    int location = glGetUniformLocation(shader->id, name);
     if (location == -1) {
         fprintf(stderr, "Uniform '%s' not found or not used in shader.\n", name);
     } else {
@@ -84,8 +84,8 @@ void GameEngine_ShaderSetUniformFloat(const GE_Shader_t *program, const char *na
     }
 }
 
-void GameEngine_ShaderSetUniformInt(const GE_Shader_t *program, const char *name, int value) {
-    int location = glGetUniformLocation(program->id, name);
+void GameEngine_ShaderSetUniformInt(const GE_Shader_t *shader, const char *name, int value) {
+    int location = glGetUniformLocation(shader->id, name);
     if (location == -1) {
         fprintf(stderr, "Uniform '%s' not found or not used in shader.\n", name);
     } else {
@@ -93,8 +93,8 @@ void GameEngine_ShaderSetUniformInt(const GE_Shader_t *program, const char *name
     }
 }
 
-void GameEngine_ShaderSetUniformMat4(const GE_Shader_t *program, const char *name, const float *matrix) {
-    int location = glGetUniformLocation(program->id, name);
+void GameEngine_ShaderSetUniformMat4(const GE_Shader_t *shader, const char *name, const float *matrix) {
+    int location = glGetUniformLocation(shader->id, name);
     if (location == -1) {
         fprintf(stderr, "Uniform '%s' not found or not used in shader.\n", name);
     } else {

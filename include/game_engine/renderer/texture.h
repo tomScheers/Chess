@@ -2,7 +2,7 @@
 
 typedef struct {
     char *file_path;
-    unsigned char *loc_buffer;
+    unsigned char *buffer;
     unsigned int id;
     int width, height, bpp;
 } GE_Texture_t;

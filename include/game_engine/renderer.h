@@ -4,6 +4,7 @@
 #include <game_engine/renderer/vertex_array.h>
 #include <game_engine/renderer/buffer_layout.h>
 #include <game_engine/renderer/shader.h>
+#include <game_engine/renderer/texture.h>
 
 #include <stdbool.h>
 

@@ -2,7 +2,7 @@ NAME = chess
 
 FLAGS = -std=c11 -O2
 LIBS = -lm -lcglm -lSDL3
-DIRS = -Iinclude -Ivendor/sdl/include -Ivendor/cglm/include
+DIRS = -Iinclude -Ivendor/sdl/include -Ivendor/cglm/include -Ivendor/stb
 
 BUILD_TARGET=SOMETHING
 

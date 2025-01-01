@@ -32,6 +32,9 @@ void GameEngine_RendererInit() {
 
     GE_g_renderer.vsync = true;
     SDL_GL_SetSwapInterval(GE_g_renderer.vsync);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 }
 
 void GameEngine_RendererQuit() {
