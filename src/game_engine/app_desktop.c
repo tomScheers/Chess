@@ -81,6 +81,8 @@ void GameEngine_AppProcess() {
             } break;
             case SDL_EVENT_WINDOW_RESIZED: {
                 SDL_GetWindowSize(GE_g_app.display, &app_state.window_width, &app_state.window_height);
+                GE_g_app.display_width = app_state.window_width;
+                GE_g_app.display_height = app_state.window_height;
                 GameEngine_RendererResizeCallback(app_state.window_width, app_state.window_height);
             } break;
         }

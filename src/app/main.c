@@ -39,7 +39,7 @@ void mainloop() {
     GameEngine_AppProcess();
 
     glm_mat4_identity(model);
-    glm_translate(model, (vec3){0.0f, 0.0f, 0.0f});
+    glm_translate(model, (vec3){100.0f, 0.0f, 0.0f});
 
     glm_mat4_identity(mvp);
     glm_mat4_mul(proj, view, mvp);

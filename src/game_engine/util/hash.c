@@ -17,7 +17,7 @@ unsigned int hash(const char *key) {
     return hashValue % MAX_HASH_ENTRY_COUNT;
 }
 
-GameEngine_HashMap_t* GameEngine_HashMapAlloc() {
+GameEngine_HashMap_t *GameEngine_HashMapAlloc() {
     GameEngine_HashMap_t *map = (GameEngine_HashMap_t*)malloc(sizeof(GameEngine_HashMap_t));
     map->table = (GameEngine_HashMapEntry_t**)malloc(sizeof(GameEngine_HashMapEntry_t*) * MAX_HASH_ENTRY_COUNT);
     
@@ -60,7 +60,7 @@ int GameEngine_HashMapFind(GameEngine_HashMap_t *map, const char *key) {
 void GameEngine_HashMapInsert(GameEngine_HashMap_t *map, const char *key, int value) {
     unsigned int index = hash(key);
     
-    GameEngine_HashMapEntry_t *new_entry = (GameEngine_HashMapEntry_t*)malloc(sizeof(GameEngine_HashMapEntry_t));
+    GameEngine_HashMapEntry_t *new_entry = (GameEngine_HashMapEntry_t *)malloc(sizeof(GameEngine_HashMapEntry_t));
     new_entry->key = SDL_strdup(key);
     new_entry->value = value;
     new_entry->next = map->table[index];

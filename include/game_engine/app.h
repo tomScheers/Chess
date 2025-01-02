@@ -4,6 +4,7 @@
 
 typedef struct {
     void *display;
+    int display_width, display_height;
     bool running;
 } GE_App_t;
 extern GE_App_t GE_g_app;

@@ -10,7 +10,7 @@ typedef struct GameEngine_HashMap_t {
     GameEngine_HashMapEntry_t **table;
 } GameEngine_HashMap_t;
 
-GameEngine_HashMap_t* GameEngine_HashMapAlloc();
+GameEngine_HashMap_t *GameEngine_HashMapAlloc();
 void GameEngine_HashMapFree(GameEngine_HashMap_t *map);
 
 int GameEngine_HashMapFind(GameEngine_HashMap_t *map, const char *key);
