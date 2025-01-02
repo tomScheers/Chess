@@ -8,6 +8,12 @@ typedef struct {
 } GE_App_t;
 extern GE_App_t GE_g_app;
 
+typedef struct {
+    int mouse_x, mouse_y;
+    bool keys[256], mouse_buttons[5];
+} GE_InputState_t;
+extern GE_InputState_t GE_g_input_state;
+
 extern void GameEngine_RendererResizeCallback(int width, int height);
 
 const bool *GameEngine_AppIsRunning();

@@ -1,5 +1,6 @@
 #include <game_engine/app.h>
 GE_App_t GE_g_app = {0};
+GE_InputState_t GE_g_input_state = {0};
 
 #include <SDL3/SDL.h>
 
@@ -60,14 +61,28 @@ void GameEngine_AppProcess() {
                 GE_g_app.running = false;
             } break;
             case SDL_EVENT_KEY_DOWN: {
+                GE_g_input_state.keys[event.key.scancode] = true;
                 if (event.key.scancode == SDL_SCANCODE_F11) {
                     GameEngine_AppToggleFullscreen();
                 }
-            }
+            } break;
+            case SDL_EVENT_KEY_UP: {
+                GE_g_input_state.keys[event.key.scancode] = false;
+            } break; 
+            case SDL_EVENT_MOUSE_MOTION: {
+                GE_g_input_state.mouse_x = event.motion.x;
+                GE_g_input_state.mouse_y = event.motion.y;
+            } break;
+            case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+                GE_g_input_state.mouse_buttons[event.button.button] = true;
+            } break;
+            case SDL_EVENT_MOUSE_BUTTON_UP: {
+                GE_g_input_state.mouse_buttons[event.button.button] = false;
+            } break;
             case SDL_EVENT_WINDOW_RESIZED: {
                 SDL_GetWindowSize(GE_g_app.display, &app_state.window_width, &app_state.window_height);
                 GameEngine_RendererResizeCallback(app_state.window_width, app_state.window_height);
-            }
+            } break;
         }
     }
 }

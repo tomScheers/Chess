@@ -46,9 +46,8 @@ void GameEngine_RendererClear() {
 }
 
 void GameEngine_RendererDraw(const GE_VertexArray_t *vao, const GE_IndexBuffer_t *ibo, const GE_Shader_t *shader) {
-    GameEngine_ShaderUse(shader);
-
-    glBindVertexArray(vao->id);
+    GameEngine_ShaderBind(shader);
+    GameEngine_VertexArrayBind(vao);
     GameEngine_IndexBufferBind(ibo);
 
     glDrawElements(GL_TRIANGLES, ibo->count, GL_UNSIGNED_INT, NULL);

@@ -4,17 +4,17 @@
 #include <emscripten.h>
 #endif
 
-// #include <cglm/cglm.h>
+#include <cglm/cglm.h>
 
 // For testing
 #include <SDL3/SDL.h>
 #include <glad/glad.h>
 
 float vertices[] = {
-    -0.5f, -0.5f, 0.0f, 0.0f,
-     0.5f, -0.5f, 1.0f, 0.0f,
-     0.5f,  0.5f, 1.0f, 1.0f,
-    -0.5f,  0.5f, 0.0f, 1.0f
+    0.0f,   0.0f,   0.0f, 0.0f,
+    100.0f, 0.0f,   1.0f, 0.0f,
+    100.0f, 100.0f, 1.0f, 1.0f,
+    0.0f,   100.0f, 0.0f, 1.0f
 };
 
 unsigned int indices[] = {
@@ -29,10 +29,26 @@ GE_BufferLayout_t layout;
 GE_Shader_t shader;
 GE_Texture_t texture;
 
+mat4 model = GLM_MAT4_IDENTITY_INIT;
+mat4 view = GLM_MAT4_IDENTITY_INIT;
+mat4 proj = GLM_MAT4_IDENTITY_INIT;
+
+mat4 mvp = GLM_MAT4_IDENTITY_INIT;
+
 void mainloop() {
     GameEngine_AppProcess();
 
+    glm_mat4_identity(model);
+    glm_translate(model, (vec3){0.0f, 0.0f, 0.0f});
+
+    glm_mat4_identity(mvp);
+    glm_mat4_mul(proj, view, mvp);
+    glm_mat4_mul(mvp, model, mvp);
+
     GameEngine_RendererClear();
+
+    GameEngine_ShaderBind(&shader);
+    GameEngine_ShaderSetUniformMat4(&shader, "u_MVP", (float *)&mvp);
     GameEngine_RendererDraw(&vao, &ibo, &shader);
 
     SDL_GL_SwapWindow(GE_g_app.display);
@@ -55,8 +71,12 @@ int main() {
     texture = GameEngine_TextureCreate("data/image/test.png");
     GameEngine_TextureBind(&texture, 0);
 
-    // GameEngine_ShaderInit(&shader, "data/shaders/engine/basic.vert", "data/shaders/engine/basic.frag");
-    GameEngine_ShaderInit(&shader, "data/shaders/engine/textured.vert", "data/shaders/engine/textured.frag");
+    glm_translate(model, (vec3){300.0f, 300.0f, 0.0f});
+    glm_translate(view, (vec3){0.0f, 0.0f, 0.0f});
+    glm_ortho(0.f, 1920.f, 0.f, 1080.f, -1.0, 100.0f, proj);
+
+    shader = GameEngine_ShaderCreate("data/shaders/engine/textured.vert", "data/shaders/engine/textured.frag");
+    GameEngine_ShaderBind(&shader);
     GameEngine_ShaderSetUniformInt(&shader, "u_texture", 0);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
