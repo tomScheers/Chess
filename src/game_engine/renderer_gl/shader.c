@@ -64,10 +64,13 @@ GE_Shader_t GameEngine_ShaderCreate(const char *vs_file_path, const char *fs_fil
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    shader.uniform_cache = GameEngine_HashMapAlloc();
+
     return shader;
 }
 
 void GameEngine_ShaderDestroy(GE_Shader_t *shader) {
+    GameEngine_HashMapFree(shader->uniform_cache);
     glDeleteProgram(shader->id);
     shader->id = 0;
 }
@@ -76,8 +79,19 @@ void GameEngine_ShaderBind(const GE_Shader_t *shader) {
     glUseProgram(shader->id);
 }
 
-void GameEngine_ShaderSetUniformFloat(const GE_Shader_t *shader, const char *name, float value) {
+int GameEngine_ShaderGetUniformLocation(const GE_Shader_t *shader, const char *name) {
+    int ca = GameEngine_HashMapFind(shader->uniform_cache, name);
+    if(ca != -1) {
+        return ca;
+    }
+
     int location = glGetUniformLocation(shader->id, name);
+    GameEngine_HashMapInsert(shader->uniform_cache, name, location);
+    return location;
+}
+
+void GameEngine_ShaderSetUniformFloat(const GE_Shader_t *shader, const char *name, float value) {
+    int location = GameEngine_ShaderGetUniformLocation(shader, name);
     if (location == -1) {
         fprintf(stderr, "Uniform '%s' not found or not used in shader.\n", name);
     } else {
@@ -86,7 +100,7 @@ void GameEngine_ShaderSetUniformFloat(const GE_Shader_t *shader, const char *nam
 }
 
 void GameEngine_ShaderSetUniformInt(const GE_Shader_t *shader, const char *name, int value) {
-    int location = glGetUniformLocation(shader->id, name);
+    int location = GameEngine_ShaderGetUniformLocation(shader, name);
     if (location == -1) {
         fprintf(stderr, "Uniform '%s' not found or not used in shader.\n", name);
     } else {
@@ -95,7 +109,7 @@ void GameEngine_ShaderSetUniformInt(const GE_Shader_t *shader, const char *name,
 }
 
 void GameEngine_ShaderSetUniformMat4(const GE_Shader_t *shader, const char *name, const float *matrix) {
-    int location = glGetUniformLocation(shader->id, name);
+    int location = GameEngine_ShaderGetUniformLocation(shader, name);
     if (location == -1) {
         fprintf(stderr, "Uniform '%s' not found or not used in shader.\n", name);
     } else {

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SDL3/SDL_iostream.h>
 #include <stdio.h>
 #include <stdlib.h>

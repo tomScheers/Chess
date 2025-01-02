@@ -49,6 +49,7 @@ void mainloop() {
 
     GameEngine_ShaderBind(&shader);
     GameEngine_ShaderSetUniformMat4(&shader, "u_MVP", (float *)&mvp);
+    GameEngine_HashMapPrint(shader.uniform_cache);
     GameEngine_RendererDraw(&vao, &ibo, &shader);
 
     SDL_GL_SwapWindow(GE_g_app.display);
