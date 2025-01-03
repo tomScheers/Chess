@@ -23,11 +23,17 @@ Object_PieceSet_t Object_PieceSet_Create(CE_Game *game, Object_Board_t *board) {
 				object.pieces[i][j].transform.translation[1] = position[1] + board->transform.translation[1];
 				object.pieces[i][j].transform.scale[0] = SQUARE_SIZE;
 				object.pieces[i][j].transform.scale[1] = SQUARE_SIZE;
+				object.pieces[i][j].quad = GameEngine_GFX_TexturedQuadCreate();
                 switch(game->board[i][j]) {
                     case CE_BLACK_PAWN:
+						object.pieces[i][j].quad.texture = Game_g_cache.bpawn_texture;
+						break;
                     case CE_WHITE_PAWN:
+						object.pieces[i][j].quad.texture = Game_g_cache.wpawn_texture;
+						break;
                     default:
-						// Not handled
+						object.pieces[i][j].quad.texture = Game_g_cache.wpawn_texture;
+						// object.pieces[i][j].quad.texture = Game_g_cache.debug_texture;
                         break;
                 }
 			}
@@ -43,9 +49,11 @@ void Object_PieceSet_Destroy(CE_Game *game, Object_PieceSet_t *object) {
 }
 
 void Object_PieceSet_Render(Object_PieceSet_t *object, GE_Camera_t *camera) {
-    for (int row = 0; row < BOARD_SIZE; ++row) {
-		for (int col = 0; col < BOARD_SIZE; ++col) {
-			// Render
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+		for (int j = 0; j < BOARD_SIZE; ++j) {
+			GameEngine_ShaderBind(&object->pieces[i][j].quad.shader);
+			GameEngine_TextureBind(&object->pieces[i][j].quad.texture, 0);
+			GameEngine_GFX_TexturedQuadRender(&object->pieces[i][j].quad, camera, &object->pieces[i][j].transform);
 		}
 	}
 }

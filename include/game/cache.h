@@ -5,6 +5,7 @@
 typedef struct {
     GE_Texture_t debug_texture;
     GE_Texture_t board_texture;
+    GE_Texture_t bpawn_texture, wpawn_texture;
 } Game_Cache_t;
 extern Game_Cache_t Game_g_cache;
 
