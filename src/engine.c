@@ -105,9 +105,9 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
   switch (game->board[src->y][src->x]) {
   case CE_BLACK_PAWN:
   case CE_WHITE_PAWN:
-    if (src->x == game->enPassantSquare->x && dst->y == game->enPassantSquare->y) {
+    if (dst->x == game->enPassantSquare->x && dst->y == game->enPassantSquare->y) {
       int pawnIncrement = game->currPlayer == CE_WHITE_PLAYER ? 1 : -1;
-      game->board[game->enPassantSquare->y + pawnIncrement][game->enPassantSquare->x] = CE_EMPTY;
+      game->board[game->enPassantSquare->y - pawnIncrement][game->enPassantSquare->x] = CE_EMPTY;
     } else if (dst->y - src->y == 2 || src->y - dst->y == 2) {
       game->enPassantSquare->x = dst->x;
       game->enPassantSquare->y = dst->y - (game->currPlayer == CE_WHITE_PLAYER ? 1 : -1);
