@@ -4,7 +4,7 @@
 
 typedef struct {
     vec3 translation;
-    vec3 rotation;
+    vec3 rotation, rotation_origin;
     vec3 scale;
 } GE_Transform_t;
 

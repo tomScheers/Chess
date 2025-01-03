@@ -5,6 +5,8 @@
 #include <game/gameobjects.h>
 #include <game/cache.h>
 
+#include <game_engine/util/math.h>
+
 Object_Board_t board;
 GE_Camera_t camera;
 CE_Game *game;
@@ -25,7 +27,7 @@ void Game_Scene_Demo0_Shutdown() {
 }
 
 void Game_Scene_Demo0_Update(double dt) {
-
+    Object_PieceSet_Update(&piece_set);
 }
 
 void Game_Scene_Demo0_Render() {

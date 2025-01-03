@@ -97,9 +97,6 @@ int GameEngine_ShaderGetUniformLocation(GE_Shader_t *shader, const char *name) {
     }
 
     int location = glGetUniformLocation(shader->id, name);
-    if (location == -1) {
-        fprintf(stderr, "Uniform '%s' not found or not used in shader.\n", name);
-    }
     map_set(&shader->uniform_cache, name, location);
     return location;
 }

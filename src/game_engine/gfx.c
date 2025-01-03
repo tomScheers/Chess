@@ -96,11 +96,12 @@ void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *cam
     glm_mat4_identity(mvp);
     glm_mat4_identity(model);
 
-    glm_translate(model, (float *)transform->translation);
+    glm_translate(model, transform->translation);
+
     glm_rotate(model, transform->rotation[0], (vec3){1.0f, 0.0f, 0.0f});
     glm_rotate(model, transform->rotation[1], (vec3){0.0f, 1.0f, 0.0f});
     glm_rotate(model, transform->rotation[2], (vec3){0.0f, 0.0f, 1.0f});
-    glm_scale(model, (float *)transform->scale);
+    glm_scale(model, transform->scale);
 
     glm_mat4_mul(camera->projection, camera->view, mvp);
     glm_mat4_mul(mvp, model, mvp);
@@ -123,7 +124,7 @@ GE_Camera_t GameEngine_GFX_CameraOrthoCreate(int width, int height) {
     glm_mat4_identity(camera.view);
     glm_mat4_identity(camera.projection);
 
-    glm_ortho(0.f, width, 0.f, height, -10.f, 50.f, camera.projection);
+    glm_ortho(0.f, width, 0.f, height, -1.f, 1.f, camera.projection);
     camera.width = width;
     camera.height = height;
 
@@ -132,7 +133,7 @@ GE_Camera_t GameEngine_GFX_CameraOrthoCreate(int width, int height) {
 
 void GameEngine_GFX_CameraOrthoSetSize(GE_Camera_t *camera, int width, int height) {
     if (camera) {
-        glm_ortho(0.f, width, 0.f, height, -10.f, 50.f, camera->projection);
+        glm_ortho(0.f, width, 0.f, height, -1.f, 1.f, camera->projection);
         camera->width = width;
         camera->height = height;
     }

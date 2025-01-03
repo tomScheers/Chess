@@ -20,6 +20,16 @@ Object_Board_t Object_Board_Create() {
     object.transform.scale[1] = object.transform.scale[0];
     object.transform.translation[0] = ((float)1600/2)-(object.transform.scale[0]/2);
     object.transform.translation[1] = ((float)900/2)-(object.transform.scale[1]/2);
+    object.transform.translation[2] = .8f;
+    {
+        vec3 half_scale;
+        vec3 translation;
+        glm_vec3_divs(object.transform.rotation_origin, 2, half_scale);
+        glm_vec3_add(object.transform.translation, half_scale, translation);
+
+        object.transform.rotation_origin[0] = translation[0];
+        object.transform.rotation_origin[1] = translation[1];
+    }
 
     return object;
 }

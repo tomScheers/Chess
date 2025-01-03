@@ -51,19 +51,13 @@ GE_Texture_t GameEngine_TextureCreate(const char *file_path) {
 }
 
 void GameEngine_TextureDestroy(GE_Texture_t *texture) {
-    if (texture && texture->id != 0) {
-        glDeleteTextures(1, &texture->id);
-        texture->id = 0; // Reset texture ID to 0 after deletion
-    }
+    glDeleteTextures(1, &texture->id);
+    texture->id = 0; // Reset texture ID to 0 after deletion
 }
 
 void GameEngine_TextureBind(const GE_Texture_t *texture, unsigned int slot) {
-    if (texture && texture->id != 0) {
-        glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(GL_TEXTURE_2D, texture->id);
-    } else {
-        fprintf(stderr, "Warning: Trying to bind an invalid texture.\n");
-    }
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
 }
 
 void GameEngine_TextureUnbind() {
