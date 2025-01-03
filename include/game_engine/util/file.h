@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char* GameEngine_ReadFile(const char *file_path) {
+char* GameEngine_ReadFile(const char *file_path) {
     SDL_IOStream* file = SDL_IOFromFile(file_path, "r");
     if(!file) {
         fprintf(stderr, "Failed to open file: %s\n", SDL_GetError());

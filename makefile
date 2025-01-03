@@ -8,7 +8,7 @@ BUILD_TARGET=SOMETHING
 
 GAME_SRC = src/game/entry.c
 APP_SRC = $(GAME_SRC) \
-	src/app/main.c src/game_engine/gfx.c
+	src/app/main.c src/game_engine/gfx.c src/game_engine/types.c
 
 SRC = src/glad/glad.c src/map/src/map.c \
 	$(APP_SRC)

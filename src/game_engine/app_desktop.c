@@ -34,8 +34,8 @@ void GameEngine_AppInit() {
         const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
         app_state.monitor_width = mode->w;
         app_state.monitor_height = mode->h;
-        app_state.window_width = mode->w/2;
-        app_state.window_height = mode->h/2;
+        GE_g_app.display_width = app_state.window_width = mode->w/2;
+        GE_g_app.display_height = app_state.window_height = mode->h/2;
     }
 
     GE_g_app.display = SDL_CreateWindow(NULL, app_state.monitor_width/2, app_state.window_height, SDL_WINDOW_OPENGL);

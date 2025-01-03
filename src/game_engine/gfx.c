@@ -6,13 +6,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-void InitializeTransform(GE_Transform_t *transform) {
-    if (!transform) return;
-    glm_vec3_zero(transform->translation);
-    glm_vec3_zero(transform->rotation);
-    glm_vec3_one(transform->scale);
-}
-
 void GameEngine_GFX_MeshDestroy(GE_Mesh_t *mesh) {
     if(mesh) {
         if(mesh->vertices) {
@@ -81,10 +74,8 @@ GE_TexturedQuad_t GameEngine_GFX_TexturedQuadCreate(const char *texture_file_pat
     GameEngine_BufferLayoutAddAttribute(&quad.mesh.layout, GL_FLOAT, 2, GL_FALSE);
     GameEngine_BufferLayoutBind(&quad.mesh.layout);
 
-    quad.shader = GameEngine_ShaderCreate("data/shaders/engine/basic_tq.vert", "data/shaders/engine/basic_tq.frag");
+    quad.shader = GameEngine_ShaderCreate("data/shader/engine/textured.vert", "data/shader/engine/textured.frag");
     quad.texture = GameEngine_TextureCreate(texture_file_path);
-
-    InitializeTransform(&quad.transform);
 
     return quad;
 }
@@ -99,18 +90,20 @@ void GameEngine_GFX_TexturedQuadDestroy(GE_TexturedQuad_t *quad) {
     }
 }
 
-void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *camera) {
+void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *camera, GE_Transform_t *transform) {
     if (!quad || !camera) return;
 
     mat4 mvp, model;
     glm_mat4_identity(mvp);
     glm_mat4_identity(model);
 
-    glm_translate(model, (float *)quad->transform.translation);
-    glm_rotate(model, quad->transform.rotation[0], (vec3){1.0f, 0.0f, 0.0f});
-    glm_rotate(model, quad->transform.rotation[1], (vec3){0.0f, 1.0f, 0.0f});
-    glm_rotate(model, quad->transform.rotation[2], (vec3){0.0f, 0.0f, 1.0f});
-    glm_scale(model, (float *)quad->transform.scale);
+    transform->translation[1] = camera->height-transform->translation[1] - transform->scale[1]; // Fix for the origin being at the top left corner
+    
+    glm_translate(model, (float *)transform->translation);
+    glm_rotate(model, transform->rotation[0], (vec3){1.0f, 0.0f, 0.0f});
+    glm_rotate(model, transform->rotation[1], (vec3){0.0f, 1.0f, 0.0f});
+    glm_rotate(model, transform->rotation[2], (vec3){0.0f, 0.0f, 1.0f});
+    glm_scale(model, (float *)transform->scale);
 
     glm_mat4_mul(camera->projection, camera->view, mvp);
     glm_mat4_mul(mvp, model, mvp);
@@ -132,6 +125,8 @@ GE_Camera_t GameEngine_GFX_CameraOrthoCreate(int width, int height) {
     glm_mat4_identity(camera.projection);
 
     glm_ortho(0.f, width, 0.f, height, -10.f, 50.f, camera.projection);
+    camera.width = width;
+    camera.height = height;
 
     return camera;
 }
@@ -139,5 +134,7 @@ GE_Camera_t GameEngine_GFX_CameraOrthoCreate(int width, int height) {
 void GameEngine_GFX_CameraOrthoSetSize(GE_Camera_t *camera, int width, int height) {
     if (camera) {
         glm_ortho(0.f, width, 0.f, height, -10.f, 50.f, camera->projection);
+        camera->width = width;
+        camera->height = height;
     }
 }
