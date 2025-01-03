@@ -52,3 +52,7 @@ void GameEngine_RendererDraw(const GE_VertexArray_t *vao, const GE_IndexBuffer_t
 
     glDrawElements(GL_TRIANGLES, ibo->count, GL_UNSIGNED_INT, NULL);
 }
+
+void GameEngine_RendererSubmit() {
+    SDL_GL_SwapWindow(GE_g_app.display);
+}

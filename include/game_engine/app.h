@@ -23,3 +23,10 @@ const bool *GameEngine_AppToggleFullscreen();
 void GameEngine_AppInit();
 void GameEngine_AppQuit();
 void GameEngine_AppProcess();
+
+typedef struct {
+    void (*init)(void), (*shutdown)(void), (*update)(double dt), (*renderpass)();
+} GE_ProjectCallbacks_t;
+
+// Defined in project
+GE_ProjectCallbacks_t Game_Entry();

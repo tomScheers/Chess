@@ -21,3 +21,4 @@ void GameEngine_RendererQuit();
 
 void GameEngine_RendererClear();
 void GameEngine_RendererDraw(const GE_VertexArray_t *vao, const GE_IndexBuffer_t *ibo, const GE_Shader_t *shader);
+void GameEngine_RendererSubmit();

@@ -7,47 +7,28 @@
 
 #include <cglm/cglm.h>
 
-// For testing
-#include <SDL3/SDL.h>
-#include <glad/glad.h>
-
-GE_TexturedQuad_t quad;
-GE_TexturedQuad_t quad2;
-GE_Camera_t camera;
+GE_ProjectCallbacks_t callbacks;
 
 void mainloop() {
     GameEngine_AppProcess();
+    
+    // TODO: Calculate delta time
+
+    if(callbacks.update) callbacks.update(0);
 
     GameEngine_RendererClear();
 
-    GameEngine_ShaderBind(&quad.shader);
-    GameEngine_GFX_TexturedQuadRender(&quad, &camera);
+    if(callbacks.renderpass) callbacks.renderpass();
 
-    GameEngine_ShaderBind(&quad2.shader);
-    GameEngine_GFX_TexturedQuadRender(&quad2, &camera);
-
-    SDL_GL_SwapWindow(GE_g_app.display);
+    GameEngine_RendererSubmit();
 }
 
 int main() {
     GameEngine_AppInit();
     GameEngine_RendererInit();
+    callbacks = Game_Entry();
 
-    quad = GameEngine_GFX_TexturedQuadCreate("data/image/test.png");
-    camera = GameEngine_GFX_CameraOrthoCreate(1600, 900);
-    quad.transform.scale[0] = 100.f;
-    quad.transform.scale[1] = 100.f;
-
-    quad2 = GameEngine_GFX_TexturedQuadCreate("data/image/test.png");
-    quad2.transform.scale[0] = 100.f;
-    quad2.transform.scale[1] = 100.f;
-    quad2.transform.translation[0] = 100.f;
-    quad2.transform.translation[1] = 100.f;
-
-    GameEngine_ShaderDestroy(&quad2.shader);
-    quad2.shader = GameEngine_ShaderCreate("data/shaders/engine/basic_debug.vert", "data/shaders/engine/basic_debug.frag");
-
-    glClearColor(0.5f, 1.0f, 0.2f, 1.0f);
+    if(callbacks.init) callbacks.init();
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(mainloop, 60, 1);
@@ -57,7 +38,7 @@ int main() {
     }
 #endif
 
-    GameEngine_GFX_TexturedQuadDestroy(&quad);
+    if(callbacks.shutdown) callbacks.shutdown();
     GameEngine_RendererQuit();
     GameEngine_AppQuit();
     return 0;
