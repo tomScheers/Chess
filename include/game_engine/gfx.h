@@ -1,7 +1,7 @@
 #pragma once
 #include <game_engine/renderer.h>
 
-#include <game_engine/types.h>
+#include <game_engine/components.h>
 
 typedef struct {
     GE_VertexArray_t vao;

@@ -1,0 +1,4 @@
+board.transform.scale[0] = (float)layout.coord_height-50;
+board.transform.scale[1] = board.transform.scale[0];
+board.transform.translation[0] = ((float)layout.coord_width/2)-(board.transform.scale[0]/2);
+board.transform.translation[1] = ((float)layout.coord_height/2)-(board.transform.scale[1]/2);

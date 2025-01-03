@@ -1,4 +1,4 @@
-#include <game_engine/types.h>
+#include <game_engine/components.h>
 
 void GameEngine_TransformInit(GE_Transform_t *transform) {
     if (!transform) return;
