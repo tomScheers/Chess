@@ -19,7 +19,6 @@ void shutdown() {
 }
 
 void update(double dt) {
-
 }
 
 void renderpass() {

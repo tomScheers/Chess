@@ -1,29 +1,37 @@
 #include <game_engine/app.h>
 #include <game_engine/renderer.h>
-#include <game_engine/gfx.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
 #include <cglm/cglm.h>
 
+#include <time.h>
+
 GE_ProjectCallbacks_t callbacks;
+clock_t start, end;
+double dt;
 
 void mainloop() {
+    start = clock();
+
     GameEngine_AppProcess();
     
-    // TODO: Calculate delta time
-
-    if(callbacks.update) callbacks.update(0);
+    if(callbacks.update) callbacks.update(dt);
 
     GameEngine_RendererClear();
 
     if(callbacks.renderpass) callbacks.renderpass();
 
     GameEngine_RendererSubmit();
+
+    end = clock();
+
+    dt = (double)(end - start) / CLOCKS_PER_SEC;
 }
 
 int main() {
+    dt = 0;
     GameEngine_AppInit();
     GameEngine_RendererInit();
     callbacks = Game_Entry();

@@ -3,13 +3,15 @@
 #include <glad/glad.h>
 
 GE_VertexArray_t GameEngine_VertexArrayCreate() {
-    GE_VertexArray_t vertex_array;
+    GE_VertexArray_t vertex_array = {0};
+
     glGenVertexArrays(1, &vertex_array.id);
     return vertex_array;
 }
 
 void GameEngine_VertexArrayDestroy(GE_VertexArray_t *vertex_array) {
     glDeleteVertexArrays(1, &vertex_array->id);
+    vertex_array->id = 0;
 }
 
 void GameEngine_VertexArrayBind(const GE_VertexArray_t *vertex_array) {

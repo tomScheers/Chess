@@ -1,16 +1,16 @@
 NAME = chess
 
 FLAGS = -std=c11 -O2
-LIBS = -lm -lcglm -lSDL3
+LIBS = -lm -lcglm -lSDL3 -lpthread -ldl
 DIRS = -Iinclude -Ivendor/sdl/include -Ivendor/cglm/include -Ivendor/stb
 
 BUILD_TARGET=SOMETHING
 
 GAME_SRC = src/game/entry.c
 APP_SRC = $(GAME_SRC) \
-	src/app/main.c src/game_engine/util/*.c src/game_engine/gfx.c
+	src/app/main.c src/game_engine/gfx.c
 
-SRC = src/glad/glad.c \
+SRC = src/glad/glad.c src/map/src/map.c \
 	$(APP_SRC)
 
 IMPL_DESKTOP = src/game_engine/app_desktop.c \
