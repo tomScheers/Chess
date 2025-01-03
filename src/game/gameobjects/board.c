@@ -25,5 +25,6 @@ Object_Board_t Object_Board_Create() {
 }
 
 void Object_Board_Destroy(Object_Board_t *object) {
-    GameEngine_GFX_TexturedQuadDestroy(&object->quad);
+    GameEngine_GFX_MeshDestroy(&object->quad.mesh);
+    GameEngine_ShaderDestroy(&object->quad.shader);
 }

@@ -107,7 +107,7 @@ void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *cam
 
     GameEngine_VertexArrayBind(&quad->mesh.vao);
     GameEngine_IndexBufferBind(&quad->mesh.ibo);
-    GameEngine_TextureBind(&quad->texture, 0);
+    // GameEngine_TextureBind(&quad->texture, 0);
 
     GameEngine_ShaderSetUniformInt(&quad->shader, "u_Texture", 0);
     GameEngine_ShaderSetUniformMat4(&quad->shader, "u_MVP", (float *)mvp);

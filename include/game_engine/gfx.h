@@ -25,6 +25,8 @@ typedef struct {
     mat4 view, projection;
 } GE_Camera_t;
 
+void GameEngine_GFX_MeshDestroy(GE_Mesh_t *mesh);
+
 GE_TexturedQuad_t GameEngine_GFX_TexturedQuadCreate();
 
 void GameEngine_GFX_TexturedQuadDestroy(GE_TexturedQuad_t *quad);

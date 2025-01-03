@@ -7,7 +7,7 @@ DIRS = -Iinclude -Ivendor/sdl/include -Ivendor/cglm/include -Ivendor/stb
 BUILD_TARGET=SOMETHING
 
 GAME_SRC = src/game/entry.c src/game/cache.c \
-	src/game/gameobjects/*.c
+	src/game/gameobjects/*.c include/engine/engine.c
 
 APP_SRC = $(GAME_SRC) \
 	src/app/main.c src/game_engine/gfx.c src/game_engine/components.c

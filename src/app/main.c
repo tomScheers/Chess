@@ -12,7 +12,6 @@ Uint32 last_time;
 Uint32 current_time;
 float delta_time;
 
-
 void mainloop() {
     GameEngine_AppProcess();
 

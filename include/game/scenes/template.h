@@ -1,3 +1,5 @@
+#pragma once
+
 void Game_Scene_SCENENAME_Init() {
 
 }
