@@ -37,7 +37,7 @@ void GameEngine_BufferLayoutAddAttribute(GE_BufferLayout_t *layout, unsigned int
     layout->attribute_count++;
 }
 
-void GameEngine_BufferLayoutUse(const GE_BufferLayout_t *layout) {
+void GameEngine_BufferLayoutBind(const GE_BufferLayout_t *layout) {
     unsigned int offset = 0;
     for (unsigned int i = 0; i < layout->attribute_count; i++) {
         const GE_BufferAttribute_t* attr = &layout->attributes[i];
