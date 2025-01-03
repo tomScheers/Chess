@@ -1,7 +1,26 @@
 #pragma once
 
+#include "scenes/test.h"
+
 typedef enum {
     GAME_SCENE_TEST
 } Game_Scene_e;
 
-#include "scenes/test.h"
+typedef struct {
+    void (*scene_shutdown_cb)(void), (*scene_update_cb)(double dt), (*scene_render_cb)(void);
+} Game_SceneState_t;
+extern Game_SceneState_t Game_g_scene_state;
+
+void Game_SceneLoad(Game_Scene_e scene) {
+    if(Game_g_scene_state.scene_shutdown_cb) Game_g_scene_state.scene_shutdown_cb();
+
+    switch(scene) {
+        case GAME_SCENE_TEST:
+            Game_Scene_Test_Init();
+            Game_g_scene_state.scene_shutdown_cb = Game_Scene_Test_Shutdown;
+            Game_g_scene_state.scene_update_cb = Game_Scene_Test_Update;
+            Game_g_scene_state.scene_render_cb = Game_Scene_Test_Render;
+        default:
+            break;
+    }
+}

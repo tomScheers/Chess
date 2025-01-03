@@ -5,33 +5,33 @@
 #endif
 
 #include <cglm/cglm.h>
-
-#include <time.h>
+#include <SDL3/SDL_timer.h>
 
 GE_ProjectCallbacks_t callbacks;
-clock_t start, end;
-double dt;
+Uint32 last_time;
+Uint32 current_time;
+float delta_time;
+
 
 void mainloop() {
-    start = clock();
-
     GameEngine_AppProcess();
+
+    current_time = SDL_GetTicks();
+    delta_time = (current_time - last_time) / 1000.0f;
+    last_time = current_time;
     
-    if(callbacks.update) callbacks.update(dt);
+    if(callbacks.update) callbacks.update(delta_time);
 
     GameEngine_RendererClear();
 
     if(callbacks.renderpass) callbacks.renderpass();
 
     GameEngine_RendererSubmit();
-
-    end = clock();
-
-    dt = (double)(end - start) / CLOCKS_PER_SEC;
 }
 
 int main() {
-    dt = 0;
+    last_time = SDL_GetTicks();
+    delta_time = 0;
     GameEngine_AppInit();
     GameEngine_RendererInit();
     callbacks = Game_Entry();
