@@ -35,28 +35,27 @@ void testCreateBoard() {
 
 void testMovePiece() {
   CE_Game *game = CE_initGame();
-  CE_Coord *src = (CE_Coord *)alloca(sizeof(CE_Coord));
-  CE_Coord *dst = (CE_Coord *)alloca(sizeof(CE_Coord));
-  src->y = 1;
-  src->x = 0;
-  dst->y = 2;
-  dst->x = 4;
-  CE__movePiece(game, src, dst);
-  src->y = 7;
-  src->x = 4;
-  dst->x = 0;
-  dst->y = 0;
-  CE__movePiece(game, src, dst);
-  src->y = 6;
-  src->x = 7;
-  dst->y = 5;
-  dst->x = 4;
-  CE__movePiece(game, src, dst);
-  src->y = 0;
-  src->x = 0;
-  dst->y = 0;
-  dst->x = 0;
-  CE__movePiece(game, src, dst);
+  CE_Coord src, dst;
+  src.y = 1;
+  src.x = 0;
+  dst.y = 2;
+  dst.x = 4;
+  CE__movePiece(game, &src, &dst);
+  src.y = 7;
+  src.x = 4;
+  dst.x = 0;
+  dst.y = 0;
+  CE__movePiece(game, &src, &dst);
+  src.y = 6;
+  src.x = 7;
+  dst.y = 5;
+  dst.x = 4;
+  CE__movePiece(game, &src, &dst);
+  src.y = 0;
+  src.x = 0;
+  dst.y = 0;
+  dst.x = 0;
+  CE__movePiece(game, &src, &dst);
   CE_SquareTypes expectedBoard[8][8] = {
       {CE_BLACK_KING, CE_WHITE_KNIGHT, CE_WHITE_BISHOP, CE_WHITE_QUEEN,
        CE_WHITE_KING, CE_WHITE_BISHOP, CE_WHITE_KNIGHT, CE_WHITE_ROOK},
@@ -83,450 +82,254 @@ void testMovePiece() {
   CE_freeGame(game);
 }
 
+void movePiece(CE_Game *game, CE_Coord *src, int srcX, int srcY, CE_Coord *dst,
+               int dstX, int dstY) {
+  src->x = srcX;
+  src->y = srcY;
+  dst->x = dstX;
+  dst->y = dstY;
+  printf("src: (%d, %d); dst: (%d, %d)\n", src->x, src->y, dst->x, dst->y);
+  CE__movePiece(game, src, dst);
+  CE__printBoard(game);
+}
+
 void testIsCheck() {
   // General tests
   CE_Game *game = CE_initGame();
-  CE_Coord *src = alloca(sizeof(CE_Coord));
-  CE_Coord *dst = alloca(sizeof(CE_Coord));
+  CE_Coord src, dst;
 
   // Move white king to the centre
-  src->x = 4;
-  src->y = 0;
-  dst->x = 4;
-  dst->y = 4;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, 4, 0, &dst, 4, 4);
+  CE__printBoard(game);
 
   // Check all knight checks
-  src->x = 6;
-  src->y = 7;
-  dst->x = 2;
-  dst->y = 5;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, 6, 7, &dst, 2, 5);
+  CE__printBoard(game);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 2;
-  dst->y = 3;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 2, 3);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 3;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 3, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 3;
-  dst->y = 2;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 3, 2);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 5;
-  dst->y = 2;
-  CE__movePiece(game, src, dst);
+  src.x = dst.x;
+  src.y = dst.y;
+  dst.x = 5;
+  dst.y = 2;
+  CE__movePiece(game, &src, &dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 5, 2);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 5;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  src.x = dst.x;
+  src.y = dst.y;
+  dst.x = 5;
+  dst.y = 6;
+  CE__movePiece(game, &src, &dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 5, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 6;
-  dst->y = 5;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 6, 5);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 6;
-  dst->y = 3;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 6, 3);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
   // Knight check cleanup
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 6;
-  dst->y = 7;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 6, 7);
 
   // Pawn Checks
-  src->x = 0;
-  src->y = 6;
-  dst->x = 3;
-  dst->y = 5;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, 0, 6, &dst, 3, 5);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 5;
-  dst->y = 5;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 5, 5);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 3;
-  dst->y = 3;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 3, 3);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 5;
-  dst->y = 3;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 5, 3);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 0;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 0, 6);
 
-  src->x = 0;
-  src->y = 1;
-  dst->x = 3;
-  dst->y = 5;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, 0, 1, &dst, 3, 5);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 5;
-  dst->y = 5;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 5, 5);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 7;
-  dst->y = 7;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 7, 7);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 5;
-  dst->y = 7;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 5, 7);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
   // Pawn Cleanup
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 0;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 0, 6);
 
   // Piece used to test if blocking a check with a piece works
-  CE_Coord *blockPieceSrc = alloca(sizeof(CE_Coord));
-  CE_Coord *blockPieceDst = alloca(sizeof(CE_Coord));
+  CE_Coord blockPieceSrc, blockPieceDst;
 
   // Bishop Checks
-  src->x = 2;
-  src->y = 7;
-  dst->x = 1;
-  dst->y = 1;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, 2, 7, &dst, 1, 1);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = 2;
-  blockPieceSrc->y = 1;
-  blockPieceDst->x = 2;
-  blockPieceDst->y = 2;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
+  movePiece(game, &blockPieceSrc, 2, 1, &blockPieceDst, 2, 2);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 6;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 6, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 5;
-  blockPieceDst->y = 5;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 5, 5);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 2;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 2, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 3;
-  blockPieceDst->y = 5;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 3, 5);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 7;
-  dst->y = 1;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 7, 1);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 6;
-  blockPieceDst->y = 2;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 6, 2);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
   // Cleanup
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 0;
-  dst->y = 0;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 0, 0);
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 1;
-  blockPieceDst->y = 0;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 1, 0);
 
   // Rook Checks
-  src->x = 0;
-  src->y = 7;
-  dst->x = 0;
-  dst->y = 4;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, 0, 7, &dst, 0, 4);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 1;
-  blockPieceDst->y = 4;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 1, 4);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 7;
-  dst->y = 4;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 7, 4);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 6;
-  blockPieceDst->y = 4;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 6, 4);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 4;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 4, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 4;
-  blockPieceDst->y = 5;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 4, 5);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 4;
-  dst->y = 1;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 4, 1);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 4;
-  blockPieceDst->y = 2;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 4, 2);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
   // Clean Up
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 0;
-  dst->y = 0;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 0, 0);
 
   // Queen check
   // Diagonal checks
-  src->x = 3;
-  src->y = 7;
-  dst->x = 1;
-  dst->y = 1;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, 3, 7, &dst, 1, 1);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 2;
-  blockPieceDst->y = 2;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 2, 2);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 6;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 6, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 5;
-  blockPieceDst->y = 5;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 5, 5);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 2;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 2, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 3;
-  blockPieceDst->y = 5;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 3, 5);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 7;
-  dst->y = 1;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 7, 1);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 6;
-  blockPieceDst->y = 2;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 6, 2);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
   // Straight check
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 0;
-  dst->y = 4;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 0, 4);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 1;
-  blockPieceDst->y = 4;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 1, 4);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 7;
-  dst->y = 4;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 7, 4);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 6;
-  blockPieceDst->y = 4;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 6, 4);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 4;
-  dst->y = 6;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 4, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 4;
-  blockPieceDst->y = 5;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
-
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 4, 5);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
-  src->x = dst->x;
-  src->y = dst->y;
-  dst->x = 4;
-  dst->y = 1;
-  CE__movePiece(game, src, dst);
+  movePiece(game, &src, dst.x, dst.y, &dst, 4, 1);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  blockPieceSrc->x = blockPieceDst->x;
-  blockPieceSrc->y = blockPieceDst->y;
-  blockPieceDst->x = 4;
-  blockPieceDst->y = 2;
-  CE__movePiece(game, blockPieceSrc, blockPieceDst);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 4, 2);
+
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 }
 
@@ -833,6 +636,10 @@ void simGame() {
     CE__printBoard(game);
     printf("Curr Player: %s\n",
            game->currPlayer == CE_WHITE_PLAYER ? "White" : "Black");
+    if (game->enPassantSquare != NULL) {
+      printf("En passant square: (%d, %d)\n", game->enPassantSquare->x,
+             game->enPassantSquare->y);
+    }
     bool running = true;
     while (running) {
       printf("Perform Action:\n1: getValidMoves\n2: makeValidMove\n");
@@ -892,6 +699,7 @@ void simGame() {
     }
   }
   if (state == CE_STATE_CHECKMATED) {
+    CE__printBoard(game);
     if (game->currPlayer == CE_WHITE_PLAYER) {
       printf("Black has won by checkmate!\n");
     } else {

@@ -12,6 +12,7 @@ CE_GameState CE_getGameState(CE_Game *game) {
       if (CE__getPlayer(&game->board[i][j]) == game->currPlayer) {
         size_t validMoves = 0;
         CE_getValidMoves(game, &(CE_Coord){i, j}, &validMoves);
+        printf("Valid moves: %zu\n", validMoves);
         if (validMoves > 0) {
           hasValidMoves = true;
           break;
@@ -21,10 +22,10 @@ CE_GameState CE_getGameState(CE_Game *game) {
         break;
     }
   }
-  if (isInCheck)
-    return CE_STATE_CHECKMATED;
   if (hasValidMoves)
     return CE_STATE_ONGOING;
+  if (isInCheck)
+    return CE_STATE_CHECKMATED;
   return CE_STATE_STALEMATE;
 }
 
@@ -104,9 +105,12 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
   switch (game->board[src->y][src->x]) {
   case CE_BLACK_PAWN:
   case CE_WHITE_PAWN:
-    if (dst->y - src->y == 2) {
+    if (src->x == game->enPassantSquare->x && dst->y == game->enPassantSquare->y) {
+      int pawnIncrement = game->currPlayer == CE_WHITE_PLAYER ? 1 : -1;
+      game->board[game->enPassantSquare->y + pawnIncrement][game->enPassantSquare->x] = CE_EMPTY;
+    } else if (dst->y - src->y == 2 || src->y - dst->y == 2) {
       game->enPassantSquare->x = dst->x;
-      game->enPassantSquare->y = dst->y - 1;
+      game->enPassantSquare->y = dst->y - (game->currPlayer == CE_WHITE_PLAYER ? 1 : -1);
     }
     break;
   case CE_BLACK_KING:
@@ -162,8 +166,8 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
 CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
                             size_t *returnSize) {
   CE_SquareTypes **board = game->board;
-  CE_Coord **validMoves =
-      malloc(20 * sizeof(CE_Coord *)); // Max amount of valid moves a piece can make
+  CE_Coord **validMoves = malloc(
+      20 * sizeof(CE_Coord *)); // Max amount of valid moves a piece can make
   size_t validMovesIndex = 0;
   int yOrigin = pieceToMove->y;
   int xOrigin = pieceToMove->x;
@@ -189,6 +193,14 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
       validMoves[validMovesIndex]->y = yOrigin + pawnIncrement;
       validMoves[validMovesIndex]->x = xOrigin;
       ++validMovesIndex;
+
+      if (yOrigin == (currPlayer == CE_WHITE_PLAYER ? 1 : 6) &&
+          game->board[yOrigin + pawnIncrement * 2][xOrigin] == CE_EMPTY) {
+        validMoves[validMovesIndex] = malloc(sizeof(CE_Coord));
+        validMoves[validMovesIndex]->y = yOrigin + pawnIncrement * 2;
+        validMoves[validMovesIndex]->x = xOrigin;
+        ++validMovesIndex;
+      }
     }
 
     bool canEnPassant1 = game->enPassantSquare != NULL &&
@@ -225,16 +237,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
       validMoves[validMovesIndex] = malloc(sizeof(CE_Coord));
       validMoves[validMovesIndex]->y = yOrigin + pawnIncrement;
       validMoves[validMovesIndex]->x = xOrigin - 1;
-      ++validMovesIndex;
-    }
-
-    if (CE__isInRange(xOrigin, yOrigin + pawnIncrement * 2) &&
-        game->board[yOrigin + pawnIncrement * 2][xOrigin] == CE_EMPTY &&
-        yOrigin == (currPlayer == CE_WHITE_PLAYER ? 1 : 6)) {
-
-      validMoves[validMovesIndex] = malloc(sizeof(CE_Coord));
-      validMoves[validMovesIndex]->y = yOrigin + pawnIncrement * 2;
-      validMoves[validMovesIndex]->x = xOrigin;
       ++validMovesIndex;
     }
 
@@ -303,15 +305,15 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
     // Check for all of the traditional moves
     for (int i = -1; i <= 1; ++i) {
       for (int j = -1; j <= 1; ++j) {
-        CE__canMoveTo(game, pieceToMove, &(CE_Coord){xOrigin + i, yOrigin + j}, validMoves,
-                      &validMovesIndex);
+        CE__canMoveTo(game, pieceToMove, &(CE_Coord){xOrigin + i, yOrigin + j},
+                      validMoves, &validMovesIndex);
       }
     }
 
     // Check for castle moves
     bool *castlingRights = currPlayer == CE_WHITE_PLAYER
-                                  ? game->whiteHasCastleRight
-                                  : game->blackHasCastleRight;
+                               ? game->whiteHasCastleRight
+                               : game->blackHasCastleRight;
 
     CE_SquareTypes playerRook =
         currPlayer == CE_WHITE_PLAYER ? CE_WHITE_ROOK : CE_BLACK_ROOK;
@@ -434,12 +436,13 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
 bool CE__isInRange(int x, int y) { return y >= 0 && y < 8 && x >= 0 && x < 8; }
 
 CE_SquareTypes **CE__createBoard() {
-  CE_SquareTypes **board =
-      malloc(sizeof(CE_SquareTypes *) * 8);
-  if (board == NULL) return NULL;
+  CE_SquareTypes **board = malloc(sizeof(CE_SquareTypes *) * 8);
+  if (board == NULL)
+    return NULL;
   for (int i = 0; i < 8; ++i) {
     board[i] = malloc(sizeof(CE_SquareTypes) * 8);
-    if (board[i] == NULL) return NULL;
+    if (board[i] == NULL)
+      return NULL;
   }
   board[0][0] = CE_WHITE_ROOK;
   board[0][1] = CE_WHITE_KNIGHT;
@@ -474,33 +477,46 @@ void CE__printBoard(CE_Game *game) {
     for (int j = 0; j < 8; ++j) {
       switch (game->board[i][j]) {
       case CE_WHITE_ROOK:
+        printf("WR");
+        break;
       case CE_BLACK_ROOK:
-        printf("R");
+        printf("BR");
         break;
       case CE_WHITE_KNIGHT:
+        printf("WH");
+        break;
       case CE_BLACK_KNIGHT:
-        printf("H");
+        printf("BH");
         break;
       case CE_WHITE_BISHOP:
+        printf("WB");
+        break;
       case CE_BLACK_BISHOP:
-        printf("B");
+        printf("BB");
         break;
       case CE_WHITE_QUEEN:
+        printf("WQ");
+        break;
       case CE_BLACK_QUEEN:
-        printf("Q");
+        printf("BQ");
         break;
       case CE_WHITE_KING:
+        printf("WK");
+        break;
       case CE_BLACK_KING:
-        printf("K");
+        printf("BK");
         break;
       case CE_WHITE_PAWN:
+        printf("WP");
+        break;
       case CE_BLACK_PAWN:
-        printf("P");
+        printf("BP");
         break;
       case CE_EMPTY:
-        printf("E");
+        printf("ES");
         break;
       }
+      printf(" ");
     }
     printf("\n");
   }
@@ -527,12 +543,8 @@ bool CE__isCheck(CE_Game *game, CE_Player player) {
   // needs to take that into acount
   int moveIncrement = player == CE_WHITE_PLAYER ? 1 : -1;
 
-  CE_Coord *kingCoords = malloc(sizeof(CE_Coord));
-  if (kingCoords == NULL) {
-    fprintf(stderr, "Failed to allocate memory\n");
-    CE_freeGame(game);
-    exit(EXIT_FAILURE);
-  }
+  CE_Coord kingCoord;
+  CE_Coord *kingCoords = &kingCoord;
   kingCoords->y = -1;
   kingCoords->x = -1;
   for (int y = 0; y < 8; ++y) {
