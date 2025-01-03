@@ -25,7 +25,8 @@ typedef struct {
     mat4 view, projection;
 } GE_Camera_t;
 
-GE_TexturedQuad_t GameEngine_GFX_TexturedQuadCreate(const char *texture_file_path);
+GE_TexturedQuad_t GameEngine_GFX_TexturedQuadCreate();
+
 void GameEngine_GFX_TexturedQuadDestroy(GE_TexturedQuad_t *quad);
 
 void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *camera, GE_Transform_t *transform);

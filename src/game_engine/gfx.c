@@ -25,7 +25,7 @@ void GameEngine_GFX_MeshDestroy(GE_Mesh_t *mesh) {
     }
 }
 
-GE_TexturedQuad_t GameEngine_GFX_TexturedQuadCreate(const char *texture_file_path) {
+GE_TexturedQuad_t GameEngine_GFX_TexturedQuadCreate() {
     GE_TexturedQuad_t quad = {0};
 
     float vertices[] = {
@@ -75,7 +75,6 @@ GE_TexturedQuad_t GameEngine_GFX_TexturedQuadCreate(const char *texture_file_pat
     GameEngine_BufferLayoutBind(&quad.mesh.layout);
 
     quad.shader = GameEngine_ShaderCreate("data/shader/engine/textured.vert", "data/shader/engine/textured.frag");
-    quad.texture = GameEngine_TextureCreate(texture_file_path);
 
     return quad;
 }
@@ -97,8 +96,6 @@ void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *cam
     glm_mat4_identity(mvp);
     glm_mat4_identity(model);
 
-    transform->translation[1] = camera->height-transform->translation[1] - transform->scale[1]; // Fix for the origin being at the top left corner
-    
     glm_translate(model, (float *)transform->translation);
     glm_rotate(model, transform->rotation[0], (vec3){1.0f, 0.0f, 0.0f});
     glm_rotate(model, transform->rotation[1], (vec3){0.0f, 1.0f, 0.0f});
@@ -120,6 +117,8 @@ void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *cam
 
 GE_Camera_t GameEngine_GFX_CameraOrthoCreate(int width, int height) {
     GE_Camera_t camera = {0};
+
+    GameEngine_TransformInit(&camera.transform);
 
     glm_mat4_identity(camera.view);
     glm_mat4_identity(camera.projection);

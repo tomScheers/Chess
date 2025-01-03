@@ -4,32 +4,54 @@
 
 #include <game_engine/util/math.h>
 
-GE_TexturedQuad_t board;
-GE_Transform_t board_transform;
+#include "textures.h"
+
+typedef struct {
+    GE_TexturedQuad_t quad;
+    GE_Transform_t transform;
+} Game_BoardObject_t;
+
+typedef struct {
+    int coord_width, coord_height;
+} Game_LayoutInfo_t;
+
+
+Game_BoardObject_t board;
+Game_LayoutInfo_t layout;
 GE_Camera_t camera;
 
 void Init() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    board = GameEngine_GFX_TexturedQuadCreate("data/texture/board.png");
-    GameEngine_TransformInit(&board_transform);
+    layout = (Game_LayoutInfo_t) {
+        .coord_width = 1600,
+        .coord_height = 900
+    };
 
-    glm_vec3_scale(board_transform.scale, 500.f, board_transform.scale);
-    board_transform.scale[2] = .1;
-    camera = GameEngine_GFX_CameraOrthoCreate(1600, 900);
+    camera = GameEngine_GFX_CameraOrthoCreate(layout.coord_width, layout.coord_height);
+    Game_LoadTextures();
+
+    board.quad = GameEngine_GFX_TexturedQuadCreate();
+    board.quad.texture = g_texture_cache.board_texture;
+
+    GameEngine_TransformInit(&board.transform);
+
+    // Center and scale board
+    board.transform.scale[0] = (float)layout.coord_height-50;
+    board.transform.scale[1] = board.transform.scale[0];
+    board.transform.translation[0] = ((float)layout.coord_width/2)-(board.transform.scale[0]/2);
+    board.transform.translation[1] = ((float)layout.coord_height/2)-(board.transform.scale[1]/2);
 }
 
 void Shutdown() {
-    GameEngine_GFX_TexturedQuadDestroy(&board);
 }
 
 void Update(double dt) {
-    board_transform.translation[0] = GameEngine_NormalizePosition(GE_g_input_state.mouse_x, GE_g_app.display_width, 1600);
-    board_transform.translation[1] = GameEngine_NormalizePosition(GE_g_input_state.mouse_y, GE_g_app.display_height, 900);
 }
 
 void RenderPass() {
-    GameEngine_GFX_TexturedQuadRender(&board, &camera, &board_transform);
+    GameEngine_ShaderBind(&board.quad.shader);
+    GameEngine_GFX_TexturedQuadRender(&board.quad, &camera, &board.transform);
 }
 
 GE_ProjectCallbacks_t Game_Entry() {
