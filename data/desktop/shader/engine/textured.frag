@@ -10,4 +10,6 @@ void main()
 {
     vec4 texColor = texture(u_Texture, v_TexCoord);
     o_Color = texColor;
+    if(texColor.a < 0.1)
+        discard;
 }

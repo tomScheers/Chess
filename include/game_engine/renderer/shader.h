@@ -1,12 +1,7 @@
 #pragma once
 
-// #include <game_engine/util/hash.h>
-#include "../../../src/map/src/map.h"
-
 typedef struct {
     unsigned int id; 
-    // GameEngine_HashMap_t *uniform_cache;
-    map_int_t uniform_cache;
 } GE_Shader_t;
 
 GE_Shader_t GameEngine_ShaderCreate(const char *vs_file_path, const char *fs_file_path);

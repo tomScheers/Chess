@@ -1,10 +1,12 @@
 #pragma once
 
-#include "scenes/demo_0.h"
-
 typedef enum {
     GAME_SCENE_DEMO_0
 } Game_Scene_e;
+
+void Game_SceneLoad(Game_Scene_e scene);
+
+#include "scenes/demo_0.h"
 
 typedef struct {
     void (*scene_shutdown_cb)(void), (*scene_update_cb)(double dt), (*scene_render_cb)(void);

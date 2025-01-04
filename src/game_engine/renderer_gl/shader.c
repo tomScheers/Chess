@@ -66,20 +66,13 @@ GE_Shader_t GameEngine_ShaderCreate(const char *vs_file_path, const char *fs_fil
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    map_init(&shader.uniform_cache);
-
     return shader;
 }
 
 void GameEngine_ShaderDestroy(GE_Shader_t *shader) {
     if (!shader) return;
 
-    map_deinit(&shader->uniform_cache);
-
-    if (shader->id != 0) {
-        glDeleteProgram(shader->id);
-        shader->id = 0;
-    }
+    glDeleteProgram(shader->id);
 }
 
 void GameEngine_ShaderBind(const GE_Shader_t *shader) {
@@ -88,36 +81,30 @@ void GameEngine_ShaderBind(const GE_Shader_t *shader) {
     }
 }
 
-int GameEngine_ShaderGetUniformLocation(GE_Shader_t *shader, const char *name) {
-    if (!shader || !name) return -1;
-
-    int *ca = map_get(&shader->uniform_cache, name);
-    if (ca) {
-        return *ca;
-    }
-
-    int location = glGetUniformLocation(shader->id, name);
-    map_set(&shader->uniform_cache, name, location);
-    return location;
-}
-
 void GameEngine_ShaderSetUniformFloat(GE_Shader_t *shader, const char *name, float value) {
-    int location = GameEngine_ShaderGetUniformLocation(shader, name);
-    if (location != -1) {
+    int location = glGetUniformLocation(shader->id, name);
+    if(location != -1) {
         glUniform1f(location, value);
+    } else {
+        fprintf(stderr, "Uniform %s not found in shader\n", name);
     }
 }
 
 void GameEngine_ShaderSetUniformInt(GE_Shader_t *shader, const char *name, int value) {
-    int location = GameEngine_ShaderGetUniformLocation(shader, name);
-    if (location != -1) {
+    int location = glGetUniformLocation(shader->id, name);
+    if(location != -1) {
         glUniform1i(location, value);
+    } else {
+        fprintf(stderr, "Uniform %s not found in shader\n", name);
     }
 }
 
+
 void GameEngine_ShaderSetUniformMat4(GE_Shader_t *shader, const char *name, const float *matrix) {
-    int location = GameEngine_ShaderGetUniformLocation(shader, name);
-    if (location != -1) {
+    int location = glGetUniformLocation(shader->id, name);
+    if(location != -1) {
         glUniformMatrix4fv(location, 1, GL_FALSE, matrix);
+    } else {
+        fprintf(stderr, "Uniform %s not found in shader\n", name);
     }
 }

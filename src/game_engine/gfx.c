@@ -98,9 +98,19 @@ void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *cam
 
     glm_translate(model, transform->translation);
 
+    vec3 center = {
+        transform->scale[0] / 2.0f,
+        transform->scale[1] / 2.0f,
+        transform->scale[2] / 2.0f
+    };
+    glm_translate(model, center);
+
     glm_rotate(model, transform->rotation[0], (vec3){1.0f, 0.0f, 0.0f});
     glm_rotate(model, transform->rotation[1], (vec3){0.0f, 1.0f, 0.0f});
     glm_rotate(model, transform->rotation[2], (vec3){0.0f, 0.0f, 1.0f});
+
+    glm_translate(model, (vec3){-center[0], -center[1], -center[2]});
+
     glm_scale(model, transform->scale);
 
     glm_mat4_mul(camera->projection, camera->view, mvp);
@@ -108,7 +118,6 @@ void GameEngine_GFX_TexturedQuadRender(GE_TexturedQuad_t *quad, GE_Camera_t *cam
 
     GameEngine_VertexArrayBind(&quad->mesh.vao);
     GameEngine_IndexBufferBind(&quad->mesh.ibo);
-    // GameEngine_TextureBind(&quad->texture, 0);
 
     GameEngine_ShaderSetUniformInt(&quad->shader, "u_Texture", 0);
     GameEngine_ShaderSetUniformMat4(&quad->shader, "u_MVP", (float *)mvp);

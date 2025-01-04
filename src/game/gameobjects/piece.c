@@ -1,0 +1,183 @@
+#include <game/gameobjects.h>
+
+#include <engine/engine.h>
+
+#include <game/cache.h>
+
+#include <game_engine/util/math.h>
+#include <game_engine/app.h>
+
+void MatchPiecesToGameBoard(Object_PieceSet_t *object, Object_Board_t *board) {
+    const int SQUARE_SIZE = board->transform.scale[0] / 8;
+
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            object->pieces[i][j].quad = NULL;
+            object->pieces[i][j].held = false;
+            object->pieces[i][j].hovering = false;
+            object->pieces[i][j].yaw = 0.f;
+            object->pieces[i][j].pitch = 0.f;
+
+            GameEngine_TransformInit(&object->pieces[i][j].transform);
+            object->pieces[i][j].transform.scale[0] = (float)SQUARE_SIZE;
+            object->pieces[i][j].transform.scale[1] = object->pieces[i][j].transform.scale[0];
+
+            object->pieces[i][j].transform.translation[0] = board->transform.translation[0] + (j * SQUARE_SIZE);
+            object->pieces[i][j].transform.translation[1] = board->transform.translation[1] + (i * SQUARE_SIZE);
+            object->pieces[i][j].transform.translation[2] = 0.2f;
+
+            if(object->game->board[i][j] != CE_EMPTY) {
+                switch(object->game->board[i][j]) {
+                    case CE_WHITE_PAWN:
+                        object->pieces[i][j].quad = &Game_g_cache.wpawn_quad;
+                        break;
+                    case CE_BLACK_PAWN:
+                        object->pieces[i][j].quad = &Game_g_cache.bpawn_quad;
+                        break;
+                    case CE_WHITE_ROOK:
+                        object->pieces[i][j].quad = &Game_g_cache.wrook_quad;
+                        break;
+                    case CE_BLACK_ROOK:
+                        object->pieces[i][j].quad = &Game_g_cache.brook_quad;
+                        break;
+                    case CE_WHITE_KNIGHT:
+                        object->pieces[i][j].quad = &Game_g_cache.wknight_quad;
+                        break;
+                    case CE_BLACK_KNIGHT:
+                        object->pieces[i][j].quad = &Game_g_cache.bknight_quad;
+                        break;
+                    case CE_WHITE_BISHOP:
+                        object->pieces[i][j].quad = &Game_g_cache.wbish_quad;
+                        break;
+                    case CE_BLACK_BISHOP:
+                        object->pieces[i][j].quad = &Game_g_cache.bbish_quad;
+                        break;
+                    case CE_WHITE_QUEEN:
+                        object->pieces[i][j].quad = &Game_g_cache.wqueen_quad;
+                        break;
+                    case CE_BLACK_QUEEN:
+                        object->pieces[i][j].quad = &Game_g_cache.bqueen_quad;
+                        break;
+                    case CE_WHITE_KING:
+                        object->pieces[i][j].quad = &Game_g_cache.wking_quad;
+                        break;
+                    case CE_BLACK_KING:
+                        object->pieces[i][j].quad = &Game_g_cache.bking_quad;
+                        break;
+                    default:
+                        object->pieces[i][j].quad = &Game_g_cache.debug_quad;
+                        break;
+                }
+            }
+        }
+    }
+}
+
+Object_PieceSet_t Object_PieceSet_Create(Object_Board_t *board) {
+    Object_PieceSet_t object;
+
+    object.game = CE_initGame();
+
+    MatchPiecesToGameBoard(&object, board);
+
+    return object;
+}
+
+void Object_PieceSet_Destroy(Object_PieceSet_t *object) {
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            object->pieces[i][j].quad = NULL;
+            object->pieces[i][j].held = false;
+            object->pieces[i][j].hovering = false;
+            object->pieces[i][j].yaw = 0.f;
+            object->pieces[i][j].pitch = 0.f;
+        }
+    }
+    
+    CE_freeGame(object->game);
+}
+
+bool GameEngine_HoveringOnPiece(Object_Piece_t *object, int x, int y) {
+	vec2 min = {object->transform.translation[0], object->transform.translation[1]};
+	vec2 max = {object->transform.translation[0] + object->transform.scale[0], object->transform.translation[1] + object->transform.scale[1]};
+	vec2 point = {x, y};
+	if (point[0] >= min[0] && point[0] <= max[0] &&
+        point[1] >= min[1] && point[1] <= max[1]) {
+		return true;
+	}
+	return false;
+}
+
+void Object_PieceSet_Update(Object_PieceSet_t *object, Object_Board_t *board, Object_Cursor_t *cursor, double dt) {
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+			vec2 mouse_normalized = {GameEngine_NormalizePosition(GE_g_input_state.mouse_x, GE_g_app.display_width, 1600), 900-GameEngine_NormalizePosition(GE_g_input_state.mouse_y, GE_g_app.display_height, 900)};
+
+			if(GameEngine_HoveringOnPiece(&object->pieces[i][j], mouse_normalized[0], mouse_normalized[1])) {
+				object->pieces[i][j].hovering = true;
+				if(GE_g_input_state.mouse_buttons[1]) {
+					if(!cursor->holding) {
+                        if(!cursor->holding) {
+                            cursor->hold = (CE_Coord){j, i};
+                        }
+						object->pieces[i][j].held = true;
+						cursor->holding = true;
+					}
+				} else {
+                    if(cursor->holding) {
+                        fprintf(stdout, "Dropping piece\n");
+                        int x = (int)floor((mouse_normalized[0] - object->pieces[i][j].transform.translation[0]) / object->pieces[i][j].transform.scale[0]);
+                        int y = (int)floor((mouse_normalized[1] - object->pieces[i][j].transform.translation[1]) / object->pieces[i][j].transform.scale[1]);
+                        if(x >= 0 && x < 8 && y >= 0 && y < 8) {
+                            CE_Coord coord = {j, i};
+                            CE_makeValidMove(object->game, &cursor->hold, &coord);
+                            MatchPiecesToGameBoard(object, board);
+                        }
+                    }
+					object->pieces[i][j].held = false;
+					cursor->holding = false;
+				}
+			} else {
+				object->pieces[i][j].hovering = false;
+                object->pieces[i][j].transform.rotation[2] = 0;
+			}
+
+			if(object->pieces[i][j].held) {
+				object->pieces[i][j].transform.translation[2] = .8f;
+				object->pieces[i][j].transform.translation[0] = mouse_normalized[0] - object->pieces[i][j].transform.scale[0]/2;
+				object->pieces[i][j].transform.translation[1] = mouse_normalized[1] - object->pieces[i][j].transform.scale[1]/2;
+            }
+		}
+	}
+}
+
+void Object_PieceSet_Render(Object_PieceSet_t *object, Object_Cursor_t *cursor, GE_Camera_t *camera) {
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            if(cursor->holding) {
+                size_t size;
+                CE_Coord **valid_moves = CE_getValidMoves(object->game, &cursor->hold, &size);
+                GE_Transform_t *transform = (GE_Transform_t *)malloc(size * sizeof(GE_Transform_t));
+
+                if(valid_moves != 0) {
+                    for(size_t k = 0; k < size; k++) {
+                        transform[k] = object->pieces[valid_moves[k]->y][valid_moves[k]->x].transform;
+                        transform[k].translation[2] = 0.5f;
+                        GameEngine_ShaderBind(&Game_g_cache.notch_quad.shader);
+                        GameEngine_TextureBind(&Game_g_cache.notch_quad.texture, 0);
+                        GameEngine_GFX_TexturedQuadRender(&Game_g_cache.notch_quad, camera, &transform[k]);
+                        free(valid_moves[k]);
+                    }
+                }
+
+                free(valid_moves);
+                free(transform);
+            }
+            if(object->pieces[i][j].quad != NULL && object->game->board[i][j] != CE_EMPTY) {
+                GameEngine_ShaderBind(&object->pieces[i][j].quad->shader);
+                GameEngine_TextureBind(&object->pieces[i][j].quad->texture, 0);
+                GameEngine_GFX_TexturedQuadRender(object->pieces[i][j].quad, camera, &object->pieces[i][j].transform);
+            }
+        }
+    }
+}

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "SDL3/SDL_scancode.h"
+#include "game/scenes.h"
+#include "game_engine/app.h"
 #include <stdio.h>
 
 #include <game/gameobjects.h>
@@ -7,33 +10,41 @@
 
 #include <game_engine/util/math.h>
 
-Object_Board_t board;
 GE_Camera_t camera;
-CE_Game *game;
 
-Object_PieceSet_t piece_set;
+Object_Board_t board;
+Object_Cursor_t cursor;
+
+Object_PieceSet_t pieces;
 
 void Game_Scene_Demo0_Init() {
     printf("Demo 0 initialized\n");
     board = Object_Board_Create();
     camera = GameEngine_GFX_CameraOrthoCreate(1600, 900);
-    game = CE_initGame();
-    piece_set = Object_PieceSet_Create(game, &board);
+    cursor.hold_position_tween = NULL;
+
+    pieces = Object_PieceSet_Create(&board);
+    pieces.game->startTime = 0;
+
 }
 
 void Game_Scene_Demo0_Shutdown() {
-    Object_Board_Destroy(&board);
-    Object_PieceSet_Destroy(game, &piece_set);
+    Object_PieceSet_Destroy(&pieces);
 }
 
 void Game_Scene_Demo0_Update(double dt) {
-    Object_PieceSet_Update(&piece_set);
+    if(GE_g_input_state.keys[SDL_SCANCODE_R]) {
+        Game_SceneLoad(GAME_SCENE_DEMO_0);
+    }
+
+    pieces.game->currPlayer = CE_BLACK_PLAYER; // ?? Force black player, otherwise nothing works
+    Object_PieceSet_Update(&pieces, &board, &cursor, dt);
 }
 
 void Game_Scene_Demo0_Render() {
-    GameEngine_ShaderBind(&board.quad.shader);
-    GameEngine_TextureBind(&board.quad.texture, 0);
-    GameEngine_GFX_TexturedQuadRender(&board.quad, &camera, &board.transform);
+    GameEngine_ShaderBind(&board.quad->shader);
+    GameEngine_TextureBind(&board.quad->texture, 0);
+    GameEngine_GFX_TexturedQuadRender(board.quad, &camera, &board.transform);
 
-    Object_PieceSet_Render(&piece_set, &camera);
+    Object_PieceSet_Render(&pieces, &cursor, &camera);
 }
