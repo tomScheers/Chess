@@ -12,7 +12,7 @@ GAME_SRC = src/game/entry.c src/game/cache.c \
 APP_SRC = $(GAME_SRC) \
 	src/app/main.c src/game_engine/gfx.c src/game_engine/components.c
 
-SRC = src/glad/glad.c src/map/src/map.c \
+SRC = src/glad/glad.c \
 	$(APP_SRC)
 
 IMPL_DESKTOP = src/game_engine/app_desktop.c \
