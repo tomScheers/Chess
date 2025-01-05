@@ -1,3 +1,5 @@
+#include <engine/engine_internal.h>
+
 #include <game/gameobjects.h>
 
 #include <engine/engine.h>
@@ -6,6 +8,8 @@
 
 #include <game_engine/util/math.h>
 #include <game_engine/app.h>
+
+#include <string.h>
 
 void MatchPiecesToGameBoard(Object_PieceSet_t *object, Object_Board_t *board) {
     const int SQUARE_SIZE = board->transform.scale[0] / 8;
@@ -113,47 +117,44 @@ void Object_PieceSet_Update(Object_PieceSet_t *object, Object_Board_t *board, Ob
         for (int j = 0; j < 8; ++j) {
 			vec2 mouse_normalized = {GameEngine_NormalizePosition(GE_g_input_state.mouse_x, GE_g_app.display_width, 1600), 900-GameEngine_NormalizePosition(GE_g_input_state.mouse_y, GE_g_app.display_height, 900)};
 
-			if(GameEngine_HoveringOnPiece(&object->pieces[i][j], mouse_normalized[0], mouse_normalized[1])) {
-				object->pieces[i][j].hovering = true;
-				if(GE_g_input_state.mouse_buttons[1]) {
-					if(!cursor->holding) {
-                        if(!cursor->holding) {
-                            cursor->hold = (CE_Coord){j, i};
-                        }
-						object->pieces[i][j].held = true;
-						cursor->holding = true;
-					}
-				} else {
-                    if(cursor->holding) {
-                        fprintf(stdout, "Dropping piece\n");
-                        int x = (int)floor((mouse_normalized[0] - object->pieces[i][j].transform.translation[0]) / object->pieces[i][j].transform.scale[0]);
-                        int y = (int)floor((mouse_normalized[1] - object->pieces[i][j].transform.translation[1]) / object->pieces[i][j].transform.scale[1]);
-                        if(x >= 0 && x < 8 && y >= 0 && y < 8) {
-                            CE_Coord coord = {j, i};
-                            CE_makeValidMove(object->game, &cursor->hold, &coord);
-                            MatchPiecesToGameBoard(object, board);
-                        }
+            if(GameEngine_HoveringOnPiece(&object->pieces[i][j], mouse_normalized[0], mouse_normalized[1])) {
+                object->pieces[i][j].hovering = true;
+                if (GE_g_input_state.mouse_buttons[1]) {
+                    if (!cursor->holding) {
+                        cursor->holding = true;
+                        memcpy(&cursor->hold, &(CE_Coord){j, i}, sizeof(CE_Coord));
+                        object->pieces[i][j].held = true;
                     }
-					object->pieces[i][j].held = false;
-					cursor->holding = false;
-				}
-			} else {
-				object->pieces[i][j].hovering = false;
-                object->pieces[i][j].transform.rotation[2] = 0;
-			}
+                } else {
+                    if (!cursor->holding) {
+                        CE_Coord src = cursor->hold;
+                        CE_Coord dst = (CE_Coord){j, i};
+                        CE_makeValidMove(object->game, &src, &(CE_Coord){j, i});
+                        MatchPiecesToGameBoard(object, board);
+                    }
+                    cursor->holding = false;
+                    object->pieces[i][j].held = false;
+                }
+
+            } else {
+                object->pieces[i][j].hovering = false;
+            }
 
 			if(object->pieces[i][j].held) {
 				object->pieces[i][j].transform.translation[2] = .8f;
 				object->pieces[i][j].transform.translation[0] = mouse_normalized[0] - object->pieces[i][j].transform.scale[0]/2;
 				object->pieces[i][j].transform.translation[1] = mouse_normalized[1] - object->pieces[i][j].transform.scale[1]/2;
+            } else {
+				object->pieces[i][j].transform.translation[2] = .2f;
             }
-		}
+        }
 	}
 }
 
 void Object_PieceSet_Render(Object_PieceSet_t *object, Object_Cursor_t *cursor, GE_Camera_t *camera) {
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
+            // TODO: Fix small memory leak
             if(cursor->holding) {
                 size_t size;
                 CE_Coord **valid_moves = CE_getValidMoves(object->game, &cursor->hold, &size);

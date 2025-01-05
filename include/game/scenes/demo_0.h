@@ -21,10 +21,7 @@ void Game_Scene_Demo0_Init() {
     printf("Demo 0 initialized\n");
     board = Object_Board_Create();
     camera = GameEngine_GFX_CameraOrthoCreate(1600, 900);
-    cursor.hold_position_tween = NULL;
-
     pieces = Object_PieceSet_Create(&board);
-    pieces.game->startTime = 0;
 
 }
 
@@ -37,7 +34,6 @@ void Game_Scene_Demo0_Update(double dt) {
         Game_SceneLoad(GAME_SCENE_DEMO_0);
     }
 
-    pieces.game->currPlayer = CE_BLACK_PLAYER; // ?? Force black player, otherwise nothing works
     Object_PieceSet_Update(&pieces, &board, &cursor, dt);
 }
 
