@@ -324,14 +324,14 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin - i}, validMoves,
                          &validMovesIndex))
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin + i}, validMoves,
                          &validMovesIndex))
@@ -425,14 +425,14 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin - i}, validMoves,
                          &validMovesIndex))
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin + i}, validMoves,
                          &validMovesIndex))
