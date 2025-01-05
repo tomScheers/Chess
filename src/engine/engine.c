@@ -29,9 +29,37 @@ CE_GameState CE_getGameState(CE_Game *game) {
   return CE_STATE_STALEMATE;
 }
 
-//bool CE_canPromotePawn(CE_Game *game, CE_Coord *src) {
-//  CE_Player currPlayer = CE__getPlayer(game->board[src->y][src->x]);
-//}
+bool CE_canPromotePawn(CE_Game *game, CE_Coord *src) {
+  return game->board[7][src->x] == CE_WHITE_PAWN ||
+         game->board[0][src->x] == CE_BLACK_PAWN;
+}
+
+bool CE_promotePawn(CE_Game *game, CE_Coord *pawnSquare,
+                    CE_SquareTypes promoteTo) {
+  if (!CE_canPromotePawn(game, pawnSquare)) {
+    fprintf(stdout, "Can't promote pawn\n");
+    return false;
+  }
+
+  switch (promoteTo) {
+  case CE_WHITE_KING:
+  case CE_BLACK_KING:
+  case CE_WHITE_PAWN:
+  case CE_BLACK_PAWN:
+  case CE_EMPTY:
+    fprintf(stdout, "Can't promote to this piece\n");
+    return false;
+  default:
+    if (CE__getPlayer(&game->board[pawnSquare->y][pawnSquare->x]) !=
+        CE__getPlayer(&game->board[pawnSquare->y][pawnSquare->x])) {
+      fprintf(stdout, "Can't promote to thist piece; Other player\n");
+      return false;
+    }
+    game->board[pawnSquare->y][pawnSquare->x] = promoteTo;
+    break;
+  }
+  return true;
+}
 
 CE_Game *CE_initGame() {
   CE_Game *game = malloc(sizeof(CE_Game));
@@ -103,18 +131,27 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
   if (!isValidMove)
     return false;
 
+  game->enPassantSquare->x = -1;
+  game->enPassantSquare->y = -1;
 
+  // Code for special moves
   switch (game->board[src->y][src->x]) {
   case CE_BLACK_PAWN:
-  case CE_WHITE_PAWN:
-    if (dst->x == game->enPassantSquare->x && dst->y == game->enPassantSquare->y) {
+  case CE_WHITE_PAWN: {
+    bool isPerformingEnPassant = dst->x == game->enPassantSquare->x && dst->y == game->enPassantSquare->y;
+    bool isMakingDoubleMove = dst->y - src->y == 2 || src->y - dst->y == 2;
+    if (isPerformingEnPassant) {
       int pawnIncrement = game->currPlayer == CE_WHITE_PLAYER ? 1 : -1;
-      game->board[game->enPassantSquare->y - pawnIncrement][game->enPassantSquare->x] = CE_EMPTY;
-    } else if (dst->y - src->y == 2 || src->y - dst->y == 2) {
+      game->board[game->enPassantSquare->y - pawnIncrement]
+                 [game->enPassantSquare->x] = CE_EMPTY;
+    } else if (isMakingDoubleMove) {
       game->enPassantSquare->x = dst->x;
-      game->enPassantSquare->y = dst->y - (game->currPlayer == CE_WHITE_PLAYER ? 1 : -1);
+      game->enPassantSquare->y =
+          dst->y - (game->currPlayer == CE_WHITE_PLAYER ? 1 : -1);
     }
     break;
+  }
+
   case CE_BLACK_KING:
   case CE_WHITE_KING:
     if (game->currPlayer == CE_WHITE_PLAYER) {

@@ -303,28 +303,32 @@ void testIsCheck() {
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 1, 4);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 1, 4);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
   movePiece(game, &src, dst.x, dst.y, &dst, 7, 4);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 6, 4);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 6, 4);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
   movePiece(game, &src, dst.x, dst.y, &dst, 4, 6);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 4, 5);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 4, 5);
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 
   movePiece(game, &src, dst.x, dst.y, &dst, 4, 1);
 
   assert(CE__isCheck(game, CE_WHITE_PLAYER));
 
-  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y, &blockPieceDst, 4, 2);
+  movePiece(game, &blockPieceSrc, blockPieceDst.x, blockPieceDst.y,
+            &blockPieceDst, 4, 2);
 
   assert(!CE__isCheck(game, CE_WHITE_PLAYER));
 }
@@ -390,7 +394,7 @@ void testGetValidMoves() {
   assertValidMoves(expected3, 2, validMoves3, retSize3);
 
   // Reset board
-  
+
   game->board = CE__createBoard();
 
   // Rook Tests
@@ -420,7 +424,7 @@ void testGetValidMoves() {
   assertValidMoves(expected4, 11, validMoves5, retSize5);
 
   // Reset board
-  
+
   game->board = CE__createBoard();
 
   // Bishop tests
@@ -446,7 +450,7 @@ void testGetValidMoves() {
   assertValidMoves(expectedC1, 8, givenCoords, retSize7);
 
   // Reset board
-  
+
   game->board = CE__createBoard();
 
   // Knight tests
@@ -613,6 +617,10 @@ void simGame() {
         scanf("%d", &squareToMoveTo->y);
         if (CE_makeValidMove(game, pieceToMove, squareToMoveTo)) {
           running = false;
+          if (CE_canPromotePawn(game, squareToMoveTo)) {
+            fprintf(stdout, "Can promote!!\n");
+            CE_promotePawn(game, squareToMoveTo, CE__getPlayer(&game->board[squareToMoveTo->y][squareToMoveTo->x]) == CE_WHITE_PLAYER ? CE_WHITE_QUEEN : CE_BLACK_QUEEN);
+          }
         } else {
           printf("Move must be valid\n");
         }
