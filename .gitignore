@@ -2,3 +2,5 @@
 lib/
 vendor/*/*
 compile_commands.json
+obj/
+bin/
