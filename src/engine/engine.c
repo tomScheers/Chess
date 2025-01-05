@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "engine_internal.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +28,10 @@ CE_GameState CE_getGameState(CE_Game *game) {
     return CE_STATE_CHECKMATED;
   return CE_STATE_STALEMATE;
 }
+
+//bool CE_canPromotePawn(CE_Game *game, CE_Coord *src) {
+//  CE_Player currPlayer = CE__getPlayer(game->board[src->y][src->x]);
+//}
 
 CE_Game *CE_initGame() {
   CE_Game *game = malloc(sizeof(CE_Game));
@@ -81,6 +86,10 @@ void CE_freeGame(CE_Game *game) {
 }
 
 bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
+  // Checks if the piece you're trying to move is yours and/or if it's your turn
+  if (game->currPlayer != CE__getPlayer(&game->board[src->y][src->x]))
+    return false;
+
   size_t validMovesSize = 0;
   CE_Coord **validSrcMoves = CE_getValidMoves(game, src, &validMovesSize);
   bool isValidMove = false;
@@ -90,11 +99,10 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
       break;
     }
   }
+
   if (!isValidMove)
     return false;
 
-  if (game->currPlayer != CE__getPlayer(&game->board[src->y][src->x]))
-    return false;
 
   switch (game->board[src->y][src->x]) {
   case CE_BLACK_PAWN:

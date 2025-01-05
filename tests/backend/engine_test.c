@@ -1,4 +1,4 @@
-#include "../../src/engine_internal.h"
+#include "../../src/engine/engine_internal.h"
 #include <alloca.h>
 #include <assert.h>
 #include <stdio.h>

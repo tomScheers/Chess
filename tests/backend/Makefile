@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -g
 
-SRC_DIR = ../../src
+SRC_DIR = ../../src/engine/
 BIN_DIR = .
 
 TESTS = $(wildcard *_test.c)
