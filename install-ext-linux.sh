@@ -9,6 +9,13 @@ cmake --build build/linux
 cp build/linux/*.so ../../lib/linux
 cp build/linux/*.so.* ../../lib/linux
 
+# Build SDL_Mixer
+cd ../sdl_mixer
+cmake -S . -B build/linux -DCMAKE_BUILD_TYPE=Release
+cmake --build build/linux
+cp build/linux/*.so ../../lib/linux
+cp build/linux/*.so.* ../../lib/linux
+
 # Build cglm
 cd ../cglm
 cmake -S . -B build/linux -DCMAKE_BUILD_TYPE=Release -DCGLM_STATIC=ON
