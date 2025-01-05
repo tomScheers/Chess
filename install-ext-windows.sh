@@ -5,7 +5,7 @@ git submodule update --init --recursive
 # Build SDL3
 cd vendor/sdl
 cmake -S . -B build/windows -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc
-cmake --build build/linux
+cmake --build build/windows
 cp build/windows/*.dll.a ../../lib/windows
 cp build/windows/*.dll ../../lib/windows
 
