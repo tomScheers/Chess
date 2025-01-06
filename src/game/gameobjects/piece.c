@@ -161,54 +161,56 @@ void Object_PieceSet_Update(Object_PieceSet_t *object, Object_Board_t *board, Ob
 
 static CE_Coord **valid_moves = NULL;
 static size_t valid_moves_size = 0;
+static GE_Transform_t *valid_moves_transforms = NULL;
+
+static void FreeValidMoves() {
+    if (valid_moves) {
+        for (size_t k = 0; k < valid_moves_size; k++) {
+            free(valid_moves[k]);
+        }
+        free(valid_moves);
+        valid_moves = NULL;
+        valid_moves_size = 0;
+    }
+    if (valid_moves_transforms) {
+        free(valid_moves_transforms);
+        valid_moves_transforms = NULL;
+    }
+}
 
 void Object_PieceSet_Render(Object_PieceSet_t *object, Object_Cursor_t *cursor, GE_Camera_t *camera) {
-    // Check if valid_moves needs to be recomputed
     if (cursor->holding) {
-        // Free the previous valid_moves array if it exists
-        if (valid_moves) {
-            for (size_t k = 0; k < valid_moves_size; k++) {
-                free(valid_moves[k]);
-            }
-            free(valid_moves);
-            valid_moves = NULL;
-            valid_moves_size = 0;
-        }
-
-        // Recompute valid_moves
+        FreeValidMoves();
         valid_moves = CE_getValidMoves(object->game, &cursor->hold, &valid_moves_size);
+
+        if (valid_moves && valid_moves_size > 0) {
+            valid_moves_transforms = (GE_Transform_t *)malloc(valid_moves_size * sizeof(GE_Transform_t));
+            if (!valid_moves_transforms) {
+                FreeValidMoves();
+                return;
+            }
+
+            for (size_t k = 0; k < valid_moves_size; k++) {
+                if (valid_moves[k]) {
+                    valid_moves_transforms[k] = object->pieces[valid_moves[k]->y][valid_moves[k]->x].transform;
+                    valid_moves_transforms[k].translation[2] = 0.5f;
+                }
+            }
+        }
     } else {
-        valid_moves = NULL;
+        FreeValidMoves();
     }
 
-    // Render the valid moves if available
-    if (valid_moves && valid_moves_size > 0) {
-        GE_Transform_t *transform = (GE_Transform_t *)malloc(valid_moves_size * sizeof(GE_Transform_t));
-        if (!transform) {
-            // Handle memory allocation failure
-            for (size_t k = 0; k < valid_moves_size; k++) {
-                free(valid_moves[k]);
-            }
-            free(valid_moves);
-            valid_moves = NULL;
-            valid_moves_size = 0;
-            return;
-        }
-
+    if (valid_moves && valid_moves_size > 0 && valid_moves_transforms) {
         for (size_t k = 0; k < valid_moves_size; k++) {
             if (valid_moves[k]) {
-                transform[k] = object->pieces[valid_moves[k]->y][valid_moves[k]->x].transform;
-                transform[k].translation[2] = 0.5f;
                 GameEngine_ShaderBind(&Game_g_cache.notch_quad.shader);
                 GameEngine_TextureBind(&Game_g_cache.notch_quad.texture, 0);
-                GameEngine_GFX_TexturedQuadRender(&Game_g_cache.notch_quad, camera, &transform[k]);
+                GameEngine_GFX_TexturedQuadRender(&Game_g_cache.notch_quad, camera, &valid_moves_transforms[k]);
             }
         }
-
-        free(transform);
     }
 
-    // Render the pieces
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (object->pieces[i][j].quad != NULL && object->game->board[i][j] != CE_EMPTY) {
