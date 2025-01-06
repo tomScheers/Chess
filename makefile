@@ -1,11 +1,11 @@
 NAME = chess
 
 FLAGS = -std=c11 -O2
-LIBS = -lm -lcglm -lSDL3 -lopenal -lpthread -ldl -lcurl
-DIRS = -Iinclude -Ivendor/sdl/include -Ivendor/cglm/include -Ivendor/stb -Ivendor/sdl_mixer/include -Ivendor/miniaudio
+LIBS = -lm -lcglm -lSDL3 -lpthread -ldl
+DIRS = -Iinclude -Ivendor/sdl/include -Ivendor/cglm/include -Ivendor/stb -Ivendor/sdl_mixer/include -Ivendor/miniaudio -Ivendor/curl/include
 
 GAME_SRC = src/game/entry.c src/game/cache.c \
-	src/game/gameobjects/*.c include/engine/engine/*.c include/engine/network/*.c
+	src/game/gameobjects/*.c include/engine/engine/*.c
 
 APP_SRC = $(GAME_SRC) \
 	src/app/main.c src/game_engine/gfx.c src/game_engine/components.c src/game_engine/util/*.c
@@ -20,7 +20,7 @@ all: linux
 
 linux:
 	mkdir -p bin/linux
-	bear -- ccache clang -target x86_64-linux-gnu -Wl,-rpath=. $(FLAGS) -o bin/linux/$(NAME) $(SRC) $(IMPL_DESKTOP) $(DIRS) -Llib/linux $(LIBS) -lGL
+	bear -- ccache clang -target x86_64-linux-gnu -Wl,-rpath=. $(FLAGS) -o bin/linux/$(NAME) $(SRC) include/engine/network/*.c $(IMPL_DESKTOP) $(DIRS) -Llib/linux $(LIBS) -lGL -lcurl
 	cp -f lib/linux/*.so bin/linux
 	cp -f lib/linux/*.so.* bin/linux
 	mkdir -p bin/linux/data

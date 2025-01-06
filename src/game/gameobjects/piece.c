@@ -124,9 +124,6 @@ void Object_PieceSet_Update(Object_PieceSet_t *object, Object_Board_t *board, Ob
                         cursor->holding = true;
                         memcpy(&cursor->hold, &(CE_Coord){j, i}, sizeof(CE_Coord));
                         object->pieces[i][j].held = true;
-                        if(object->pieces[i][j].type != CE_EMPTY) {
-                            GameEngine_AudioPlaySound("data/audio/click.wav");
-                        }
                     }
                 } else {
                     cursor->holding = false;
