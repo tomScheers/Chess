@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <time.h>
 
+
 typedef enum {
 	CE_EMPTY = 0,
 	CE_BLACK_BISHOP,
@@ -52,5 +53,7 @@ CE_Coord** CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove, size_t *return
 bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst);
 CE_GameState CE_getGameState(CE_Game *game);
 void CE_freeGame(CE_Game *game);
+bool CE_canPromotePawn(CE_Game *game, CE_Coord *src);
+bool CE_promotePawn(CE_Game *game, CE_Coord *pawnSquare, CE_SquareTypes promoteTo);
 
 #endif

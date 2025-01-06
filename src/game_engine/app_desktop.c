@@ -7,6 +7,8 @@ GE_InputState_t GE_g_input_state = {0};
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <game_engine/util/audio.h>
+
 typedef struct {
     int monitor_width, monitor_height;
     int window_width, window_height;
@@ -30,6 +32,8 @@ void GameEngine_AppInit() {
         exit(1);
     }
 
+    GameEngine_AudioInit();
+
     {
         const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
         app_state.monitor_width = mode->w;
@@ -49,6 +53,7 @@ void GameEngine_AppInit() {
 }
 
 void GameEngine_AppQuit() {
+    GameEngine_AudioDestroy();
     SDL_DestroyWindow(GE_g_app.display);
     SDL_Quit();
 }

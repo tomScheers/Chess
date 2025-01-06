@@ -1,0 +1,16 @@
+== Developers ==
+Tom Scheers
+Leif Rivera
+
+== Networking & Chess Engine ==
+Tom Scheers
+
+== Application, GFX & SFX ==
+Leif Rivera
+
+== Open Source Software ==
+cglm (https://github.com/recp/cglm) - Licensed under MIT
+SDL (https://github.com/libsdl-org/SDL) - Licensed under Zlib
+stb (https://github.com/nothings/stb) - Licensed under Public Domain
+miniaudio (https://github.com/mackron/miniaudio) - Licensed under Public Domain
+curl (https://github.com/curl/curl) Licensed under <https://github.com/curl/curl?tab=License-1-ov-file>

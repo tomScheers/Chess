@@ -1,8 +1,4 @@
-#include <engine/engine_internal.h>
-
 #include <game/gameobjects.h>
-
-#include <engine/engine.h>
 
 #include <game/cache.h>
 
@@ -10,6 +6,8 @@
 #include <game_engine/app.h>
 
 #include <string.h>
+
+#include <game_engine/util/audio.h>
 
 void MatchPiecesToGameBoard(Object_PieceSet_t *object, Object_Board_t *board) {
     const int SQUARE_SIZE = board->transform.scale[0] / 8;
@@ -29,6 +27,8 @@ void MatchPiecesToGameBoard(Object_PieceSet_t *object, Object_Board_t *board) {
             object->pieces[i][j].transform.translation[0] = board->transform.translation[0] + (j * SQUARE_SIZE);
             object->pieces[i][j].transform.translation[1] = board->transform.translation[1] + (i * SQUARE_SIZE);
             object->pieces[i][j].transform.translation[2] = 0.2f;
+
+            object->pieces[i][j].type = object->game->board[i][j];
 
             if(object->game->board[i][j] != CE_EMPTY) {
                 switch(object->game->board[i][j]) {
@@ -124,16 +124,22 @@ void Object_PieceSet_Update(Object_PieceSet_t *object, Object_Board_t *board, Ob
                         cursor->holding = true;
                         memcpy(&cursor->hold, &(CE_Coord){j, i}, sizeof(CE_Coord));
                         object->pieces[i][j].held = true;
+                        if(object->pieces[i][j].type != CE_EMPTY) {
+                            GameEngine_AudioPlaySound("data/audio/click.wav");
+                        }
                     }
                 } else {
-                    if (!cursor->holding) {
+                    cursor->holding = false;
+                    object->pieces[i][j].held = false;
+                    if(cursor->last_state == true && !cursor->holding) {
                         CE_Coord src = cursor->hold;
                         CE_Coord dst = (CE_Coord){j, i};
                         CE_makeValidMove(object->game, &src, &(CE_Coord){j, i});
-                        MatchPiecesToGameBoard(object, board);
+                        if(object->pieces[cursor->hold.y][cursor->hold.x].type != CE_EMPTY) {
+                            GameEngine_AudioPlaySound("data/audio/click.wav");
+                        }
                     }
-                    cursor->holding = false;
-                    object->pieces[i][j].held = false;
+                    MatchPiecesToGameBoard(object, board);
                 }
 
             } else {
@@ -149,6 +155,8 @@ void Object_PieceSet_Update(Object_PieceSet_t *object, Object_Board_t *board, Ob
             }
         }
 	}
+
+    cursor->last_state = cursor->holding;
 }
 
 void Object_PieceSet_Render(Object_PieceSet_t *object, Object_Cursor_t *cursor, GE_Camera_t *camera) {

@@ -9,12 +9,12 @@ cmake --build build/windows --config Release
 cp build/windows/*.dll.a ../../lib/windows
 cp build/windows/*.dll ../../lib/windows
 
-# Build SDL_Mixer
-cd ../sdl_mixer
+# Build curl
+cd ../curl
 cmake -S . -B build/windows -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc
 cmake --build build/windows --config Release
-cp build/windows/*.dll.a ../../lib/windows
-cp build/windows/*.dll ../../lib/windows
+cp build/windows/lib/*.dll.a ../../lib/windows
+cp build/windows/lib/*.dll ../../lib/windows
 
 # Build cglm
 cd ../cglm

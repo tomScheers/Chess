@@ -7,6 +7,9 @@
 [submodule "vendor/stb"]
 	path = vendor/stb
 	url = https://github.com/nothings/stb
-[submodule "vendor/sdl_mixer"]
-	path = vendor/sdl_mixer
-	url = https://github.com/libsdl-org/SDL_mixer.git
+[submodule "vendor/miniaudio"]
+	path = vendor/miniaudio
+	url = https://github.com/mackron/miniaudio
+[submodule "vendor/curl"]
+	path = vendor/curl
+	url = https://github.com/curl/curl

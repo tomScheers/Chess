@@ -4,6 +4,7 @@
 
 typedef struct {
     void *display;
+    void *audio_device, *audio_context;
     int display_width, display_height;
     bool running;
 } GE_App_t;

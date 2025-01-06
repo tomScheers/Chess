@@ -3,7 +3,7 @@
 #include "game_engine/gfx.h"
 #include <game_engine/components.h>
 
-#include <engine/engine.h>
+#include <engine/engine/engine.h>
 
 // TWEEN
 
@@ -65,7 +65,7 @@ void Object_Tween_SetOnComplete(Object_Tween_t* tween, void (*callback)(void* da
 typedef struct Object_Cursor_t {
     Object_Tween_t *hold_position_tween;
     CE_Coord hold;
-    bool ui, holding;
+    bool ui, holding, last_state;
 } Object_Cursor_t;
 
 
@@ -85,6 +85,7 @@ typedef struct Object_Piece_t {
     GE_Transform_t transform;
     bool held, hovering;
     float yaw, pitch;
+    CE_SquareTypes type;
 } Object_Piece_t;
 
 typedef struct Object_PieceSet_t {

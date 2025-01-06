@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "engine_internal.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,9 +29,37 @@ CE_GameState CE_getGameState(CE_Game *game) {
   return CE_STATE_STALEMATE;
 }
 
-//bool CE_canPromotePawn(CE_Game *game, CE_Coord *src) {
-//  CE_Player currPlayer = CE__getPlayer(game->board[src->y][src->x]);
-//}
+bool CE_canPromotePawn(CE_Game *game, CE_Coord *src) {
+  return game->board[7][src->x] == CE_WHITE_PAWN ||
+         game->board[0][src->x] == CE_BLACK_PAWN;
+}
+
+bool CE_promotePawn(CE_Game *game, CE_Coord *pawnSquare,
+                    CE_SquareTypes promoteTo) {
+  if (!CE_canPromotePawn(game, pawnSquare)) {
+    fprintf(stdout, "Can't promote pawn\n");
+    return false;
+  }
+
+  switch (promoteTo) {
+  case CE_WHITE_KING:
+  case CE_BLACK_KING:
+  case CE_WHITE_PAWN:
+  case CE_BLACK_PAWN:
+  case CE_EMPTY:
+    fprintf(stdout, "Can't promote to this piece\n");
+    return false;
+  default:
+    if (CE__getPlayer(&game->board[pawnSquare->y][pawnSquare->x]) !=
+        CE__getPlayer(&game->board[pawnSquare->y][pawnSquare->x])) {
+      fprintf(stdout, "Can't promote to thist piece; Other player\n");
+      return false;
+    }
+    game->board[pawnSquare->y][pawnSquare->x] = promoteTo;
+    break;
+  }
+  return true;
+}
 
 CE_Game *CE_initGame() {
   CE_Game *game = malloc(sizeof(CE_Game));
@@ -85,43 +114,44 @@ void CE_freeGame(CE_Game *game) {
 }
 
 bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
-  // fprintf(stdout, "Board before move:\n");
-  // CE__printBoard(game);
   // Checks if the piece you're trying to move is yours and/or if it's your turn
-  if (game->currPlayer != CE__getPlayer(&game->board[src->y][src->x])) {
-    fprintf(stdout, "Wrong players piece\n");
+  if (game->currPlayer != CE__getPlayer(&game->board[src->y][src->x]))
     return false;
-  }
 
   size_t validMovesSize = 0;
-  fprintf(stdout, "src: (%d, %d)\n", src->x, src->y);
   CE_Coord **validSrcMoves = CE_getValidMoves(game, src, &validMovesSize);
   bool isValidMove = false;
   for (size_t i = 0; i < validMovesSize; ++i) {
-    printf("(validMoves)(%d, %d) = (dst)(%d, %d); (src)(%d, %d)\n", validSrcMoves[i]->x, validSrcMoves[i]->y, dst->x, dst->y, src->x, src->y);
     if (validSrcMoves[i]->x == dst->x && validSrcMoves[i]->y == dst->y) {
       isValidMove = true;
       break;
     }
   }
 
-  if (!isValidMove) {
-    fprintf(stdout, "Is invalid move\n");
+  if (!isValidMove)
     return false;
-  }
 
+  game->enPassantSquare->x = -1;
+  game->enPassantSquare->y = -1;
 
+  // Code for special moves
   switch (game->board[src->y][src->x]) {
   case CE_BLACK_PAWN:
-  case CE_WHITE_PAWN:
-    if (dst->x == game->enPassantSquare->x && dst->y == game->enPassantSquare->y) {
+  case CE_WHITE_PAWN: {
+    bool isPerformingEnPassant = dst->x == game->enPassantSquare->x && dst->y == game->enPassantSquare->y;
+    bool isMakingDoubleMove = dst->y - src->y == 2 || src->y - dst->y == 2;
+    if (isPerformingEnPassant) {
       int pawnIncrement = game->currPlayer == CE_WHITE_PLAYER ? 1 : -1;
-      game->board[game->enPassantSquare->y - pawnIncrement][game->enPassantSquare->x] = CE_EMPTY;
-    } else if (dst->y - src->y == 2 || src->y - dst->y == 2) {
+      game->board[game->enPassantSquare->y - pawnIncrement]
+                 [game->enPassantSquare->x] = CE_EMPTY;
+    } else if (isMakingDoubleMove) {
       game->enPassantSquare->x = dst->x;
-      game->enPassantSquare->y = dst->y - (game->currPlayer == CE_WHITE_PLAYER ? 1 : -1);
+      game->enPassantSquare->y =
+          dst->y - (game->currPlayer == CE_WHITE_PLAYER ? 1 : -1);
     }
     break;
+  }
+
   case CE_BLACK_KING:
   case CE_WHITE_KING:
     if (game->currPlayer == CE_WHITE_PLAYER) {
@@ -169,8 +199,6 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
   CE__movePiece(game, src, dst);
   game->currPlayer =
       game->currPlayer == CE_WHITE_PLAYER ? CE_BLACK_PLAYER : CE_WHITE_PLAYER;
-  // fprintf(stdout, "Board after move\n");
-  // CE__printBoard(game);
   return true;
 }
 
@@ -192,11 +220,9 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
   int pawnIncrement = currPlayer == CE_WHITE_PLAYER ? 1 : -1;
   switch (board[yOrigin][xOrigin]) {
   case CE_EMPTY:
-  fprintf(stdout, "MT :(\n");
     break;
   case CE_WHITE_PAWN:
   case CE_BLACK_PAWN:
-  fprintf(stdout, "PAAAWN\n");
     if (board[yOrigin + pawnIncrement][xOrigin] == CE_EMPTY &&
         !CE__isCheck(
             CE__cpMovePiece(game, pieceToMove,
@@ -257,7 +283,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
 
   case CE_WHITE_ROOK:
   case CE_BLACK_ROOK:
-  fprintf(stdout, "ROOOOK\n");
     for (int x = pieceToMove->x - 1; x >= 0; --x) {
       if (!CE__canMoveTo(game, pieceToMove, &(CE_Coord){x, yOrigin}, validMoves,
                          &validMovesIndex))
@@ -285,7 +310,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
 
   case CE_WHITE_BISHOP:
   case CE_BLACK_BISHOP:
-  fprintf(stdout, "BISHHHOP");
     for (int i = 1; i <= 7 - xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin + i, yOrigin + i}, validMoves,
@@ -300,14 +324,14 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin - i}, validMoves,
                          &validMovesIndex))
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin + i}, validMoves,
                          &validMovesIndex))
@@ -317,7 +341,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
     break;
   case CE_WHITE_KING:
   case CE_BLACK_KING:
-  fprintf(stdout, "KIING\n");
     // Check for all of the traditional moves
     for (int i = -1; i <= 1; ++i) {
       for (int j = -1; j <= 1; ++j) {
@@ -369,7 +392,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
     break;
   case CE_WHITE_KNIGHT:
   case CE_BLACK_KNIGHT:
-    printf("KNIIIGHT\n");
     CE__canMoveTo(game, pieceToMove, &(CE_Coord){xOrigin + 2, yOrigin + 1},
                   validMoves, &validMovesIndex);
     CE__canMoveTo(game, pieceToMove, &(CE_Coord){xOrigin + 2, yOrigin - 1},
@@ -389,7 +411,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
     break;
   case CE_WHITE_QUEEN:
   case CE_BLACK_QUEEN:
-    printf(stdout, "QUEEEN\n");
     for (int i = 1; i <= 7 - xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin + i, yOrigin + i}, validMoves,
@@ -404,14 +425,14 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin - i}, validMoves,
                          &validMovesIndex))
         break;
     }
 
-    for (int i = 1; i < xOrigin; ++i) {
+    for (int i = 1; i <= xOrigin; ++i) {
       if (!CE__canMoveTo(game, pieceToMove,
                          &(CE_Coord){xOrigin - i, yOrigin + i}, validMoves,
                          &validMovesIndex))
@@ -444,8 +465,6 @@ CE_Coord **CE_getValidMoves(CE_Game *game, CE_Coord *pieceToMove,
 
     break;
   }
-  printf("Valid moves: %zu\n", validMovesIndex);
-
   *returnSize = validMovesIndex;
   return validMoves;
 }
@@ -494,48 +513,48 @@ void CE__printBoard(CE_Game *game) {
     for (int j = 0; j < 8; ++j) {
       switch (game->board[i][j]) {
       case CE_WHITE_ROOK:
-       fprintf(stdout, "WR");
+        printf("WR");
         break;
       case CE_BLACK_ROOK:
-       fprintf(stdout, "BR");
+        printf("BR");
         break;
       case CE_WHITE_KNIGHT:
-       fprintf(stdout, "WH");
+        printf("WH");
         break;
       case CE_BLACK_KNIGHT:
-       fprintf(stdout, "BH");
+        printf("BH");
         break;
       case CE_WHITE_BISHOP:
-       fprintf(stdout, "WB");
+        printf("WB");
         break;
       case CE_BLACK_BISHOP:
-       fprintf(stdout, "BB");
+        printf("BB");
         break;
       case CE_WHITE_QUEEN:
-       fprintf(stdout, "WQ");
+        printf("WQ");
         break;
       case CE_BLACK_QUEEN:
-       fprintf(stdout, "BQ");
+        printf("BQ");
         break;
       case CE_WHITE_KING:
-       fprintf(stdout, "WK");
+        printf("WK");
         break;
       case CE_BLACK_KING:
-       fprintf(stdout, "BK");
+        printf("BK");
         break;
       case CE_WHITE_PAWN:
-       fprintf(stdout, "WP");
+        printf("WP");
         break;
       case CE_BLACK_PAWN:
-       fprintf(stdout, "BP");
+        printf("BP");
         break;
       case CE_EMPTY:
-       fprintf(stdout, "ES");
+        printf("ES");
         break;
       }
-     fprintf(stdout, " ");
+      printf(" ");
     }
-   fprintf(stdout, "\n");
+    printf("\n");
   }
 }
 
