@@ -176,6 +176,7 @@ static void FreeValidMoves() {
 }
 
 void Object_PieceSet_Render(Object_PieceSet_t *object, Object_Cursor_t *cursor, GE_Camera_t *camera) {
+    // TODO: still a memory leak
     if (cursor->holding) {
         FreeValidMoves();
         valid_moves = CE_getValidMoves(object->game, &cursor->hold, &valid_moves_size);
