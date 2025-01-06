@@ -131,9 +131,7 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
   if (!isValidMove)
     return false;
 
-  game->enPassantSquare->x = -1;
-  game->enPassantSquare->y = -1;
-
+bool hasModifiedEnPassant = false;
   // Code for special moves
   switch (game->board[src->y][src->x]) {
   case CE_BLACK_PAWN:
@@ -145,12 +143,13 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
       game->board[game->enPassantSquare->y - pawnIncrement]
                  [game->enPassantSquare->x] = CE_EMPTY;
     } else if (isMakingDoubleMove) {
-      game->enPassantSquare->x = dst->x;
+     hasModifiedEnPassant = true; game->enPassantSquare->x = dst->x;
       game->enPassantSquare->y =
           dst->y - (game->currPlayer == CE_WHITE_PLAYER ? 1 : -1);
     }
     break;
   }
+
 
   case CE_BLACK_KING:
   case CE_WHITE_KING:
@@ -196,6 +195,11 @@ bool CE_makeValidMove(CE_Game *game, CE_Coord *src, CE_Coord *dst) {
   default:
     break;
   }
+
+if (!hasModifiedEnPassant) {
+game->enPassantSquare->x = -1;
+  game->enPassantSquare->y = -1;
+}
   CE__movePiece(game, src, dst);
   game->currPlayer =
       game->currPlayer == CE_WHITE_PLAYER ? CE_BLACK_PLAYER : CE_WHITE_PLAYER;
